@@ -11,17 +11,11 @@ import CustomInput from "../../components/CustomInput/CustomInput";
 import CustomButton from "../../components/CustomButton";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { useNavigation } from "@react-navigation/native";
+import { useForm, Controller } from "react-hook-form";
+
 import { myColors } from "../../../colors";
 
 import { useFonts, Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
-
-const onSignInPressed = () => {
-  console.warn("Sign in");
-};
-
-const onForgotPasswordPressed = () => {
-  console.warn("Forgot Password");
-};
 
 const SignIn = () => {
   // const [fontsLoaded] = useFonts({
@@ -31,11 +25,19 @@ const SignIn = () => {
   // if (!fontsLoaded) {
   //   return null;
   // }
+  const { control, handleSubmit } = useForm();
   const navigation = useNavigation();
 
+  const onSignInPressed = (data) => {
+    console.log(data);
+    console.warn("Sign in");
+  };
   const onSingUpPressed = () => {
     console.warn("Sign up");
     navigation.navigate("SignUp");
+  };
+  const onForgotPasswordPressed = () => {
+    console.warn("Forgot Password");
   };
 
   const [Email, setEmail] = useState("");
@@ -45,13 +47,25 @@ const SignIn = () => {
     <View style={styles.root}>
       <Image source={Logo} style={[styles.logo, { height: height * 0.2 }]} />
       <View style={styles.container}>
-        <CustomInput placeholder="Email" value={Email} setValue={setEmail} />
         <CustomInput
-          placeholder="Password"
-          value={Password}
-          setValue={setPassword}
+          name="email"
+          placeholder="Email"
+          control={control}
+          rules={{ required: "Email is required" }}
         />
-        <CustomButton onPress={onSignInPressed} text="Sign In" />
+        <CustomInput
+          name="password"
+          placeholder="Password"
+          control={control}
+          rules={{
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be minimun 6 character long",
+            },
+          }}
+        />
+        <CustomButton onPress={handleSubmit(onSignInPressed)} text="Sign In" />
         <Text style={styles.forgot} onPress={onForgotPasswordPressed}>
           Forgot Password ?
         </Text>

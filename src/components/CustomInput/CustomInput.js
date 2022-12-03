@@ -2,8 +2,9 @@ import { View, Text, TextInput, StyleSheet } from "react-native";
 import React from "react";
 import { myColors } from "../../../colors";
 import { useFonts, Rubik_400Regular } from "@expo-google-fonts/rubik";
+import { Controller } from "react-hook-form";
 
-const CustomInput = ({ value, setValue, placeholder }) => {
+const CustomInput = ({ control, name, rules = {}, placeholder }) => {
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
   });
@@ -13,15 +14,33 @@ const CustomInput = ({ value, setValue, placeholder }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.text}
-        value={value}
-        onChangeText={setValue}
-        placeholder={placeholder}
-        secureTextEntry={placeholder === "Password" ? true : false}
-      />
-    </View>
+    <Controller
+      control={control}
+      name={name}
+      render={({
+        field: { onChange, onBlur, value },
+        fieldState: { error },
+      }) => (
+        <>
+          <View style={[styles.container, error ? styles.container_error : {}]}>
+            <TextInput
+              style={styles.text}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholder={placeholder}
+              secureTextEntry={placeholder === "Password" ? true : false}
+            />
+          </View>
+          {error && (
+            <Text style={{ color: "red", alignSelf: "stretch" }}>
+              {error.message || "error"}
+            </Text>
+          )}
+        </>
+      )}
+      rules={rules}
+    />
   );
 };
 
@@ -36,6 +55,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 5,
   },
+  container_error: {
+    borderWidth: 1,
+    borderColor: "red",
+  },
+
   text: {
     fontSize: 15,
     // fontFamily: "Rubik_400Regular",
