@@ -1,27 +1,62 @@
-import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  useWindowDimensions,
+  ScrollView,
+  Alert,
+} from "react-native";
 import React, { useState } from "react";
 import CustomInput from "../../components/CustomInput/CustomInput";
 import CustomButton from "../../components/CustomButton";
 import { myColors } from "../../../colors";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
-import { useNavigation } from "@react-navigation/native";
+import { StackActions, useNavigation } from "@react-navigation/native";
+import { useForm, Controller } from "react-hook-form";
+import { Auth } from "aws-amplify";
 
-const onTermsPressed = () => {
-  console.warn("Terms");
-};
+const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
 const onPrivacyPressed = () => {
   console.warn("Privacy");
 };
 
 const SignUp = () => {
+  const [loading, setLoading] = useState(false);
+  const { control, handleSubmit, watch } = useForm();
+  const pwd = watch("password");
+
   const navigation = useNavigation();
   const onSignInPressed = () => {
     console.warn("Sign in");
     navigation.navigate("SignIn");
   };
-  const onRegisterPressed = () => {
-    console.warn("Sign up");
-    navigation.navigate("ConfirmEmail");
+  const onRegisterPressed = async (data) => {
+    if (loading) return;
+    setLoading(true);
+    const { name, email, password } = data;
+    name.trim();
+    email.trim();
+    password.trim();
+    try {
+      const response = await Auth.signUp({
+        username: email,
+        email,
+        password,
+        attributes: {
+          name,
+        },
+      });
+
+      navigation.navigate("ConfirmEmail", { email });
+    } catch (error) {
+      Alert.alert("Oops", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const onTermsPressed = () => {
+    console.warn("Terms");
   };
 
   const { width, height } = useWindowDimensions();
@@ -30,42 +65,79 @@ const SignUp = () => {
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   return (
-    <View style={styles.root}>
-      <Text style={styles.title}>Create an account</Text>
-      <View style={styles.container}>
-        <CustomInput
-          placeholder="Username"
-          value={Username}
-          setValue={setUsername}
-        />
-        <CustomInput placeholder="Email" value={Email} setValue={setEmail} />
-        <CustomInput
-          placeholder="Password"
-          value={Password}
-          setValue={setPassword}
-        />
-        <CustomInput
-          placeholder="Confirm Password"
-          value={ConfirmPassword}
-          setValue={setConfirmPassword}
-        />
-        <CustomButton onPress={onRegisterPressed} text="Register" />
-        <Text style={styles.text}>
-          By registering, you confirm that you accept our{" "}
-          <Text style={{ color: "white" }} onPress={onTermsPressed}>
-            Terms of use
-          </Text>{" "}
-          and{" "}
-          <Text style={{ color: "white" }} onPress={onPrivacyPressed}>
-            Privacy Policy
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.root}>
+        <Text style={styles.title}>Create an account</Text>
+        <View style={styles.container}>
+          <CustomInput
+            name="name"
+            placeholder="Name"
+            control={control}
+            rules={{
+              required: "Name is required",
+              minLength: {
+                value: 3,
+                message: "Name must be at least 3 characters",
+              },
+              maxLength: {
+                value: 15,
+                message: "Name must be at most 15 characters",
+              },
+            }}
+          />
+          <CustomInput
+            name="email"
+            placeholder="Email"
+            control={control}
+            rules={{
+              required: "Email is required",
+              pattern: { value: EMAIL_REGEX, message: "Invalid email address" },
+            }}
+          />
+          <CustomInput
+            name="password"
+            placeholder="Password"
+            control={control}
+            rules={{
+              required: "Password is required",
+              minLength: {
+                value: 6,
+                message: "Password must be at least 6 characters",
+              },
+            }}
+            secure={true}
+          />
+          <CustomInput
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            control={control}
+            rules={{
+              required: "Passwords do not match",
+              validate: (value) => value === pwd || "Passwords do not match",
+            }}
+            secure={true}
+          />
+          <CustomButton
+            onPress={handleSubmit(onRegisterPressed)}
+            text={loading ? "Loading..." : "Register"}
+          />
+          <Text style={styles.text}>
+            By registering, you confirm that you accept our{" "}
+            <Text style={{ color: "white" }} onPress={onTermsPressed}>
+              Terms of use
+            </Text>{" "}
+            and{" "}
+            <Text style={{ color: "white" }} onPress={onPrivacyPressed}>
+              Privacy Policy
+            </Text>
           </Text>
+        </View>
+        <SocialSignInButtons />
+        <Text style={styles.link} onPress={onSignInPressed}>
+          Already have an account? Sign In
         </Text>
       </View>
-      <SocialSignInButtons />
-      <Text style={styles.link} onPress={onSignInPressed}>
-        Already have an account? Sign In
-      </Text>
-    </View>
+    </ScrollView>
   );
 };
 

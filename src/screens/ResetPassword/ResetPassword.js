@@ -15,35 +15,31 @@ import { useForm } from "react-hook-form";
 import { useRoute } from "@react-navigation/native";
 import { Auth } from "aws-amplify";
 
-const ConfirmEmail = () => {
+const ResetPassword = () => {
   const route = useRoute();
-  const { control, handleSubmit, watch } = useForm({
-    defaultValues: {
-      email: route?.params?.email,
-    },
-  });
+  const { control, handleSubmit, watch } = useForm();
 
   const email = watch("email");
   const navigation = useNavigation();
 
-  const onConfirmPressed = async (data) => {
+  const onSendPressed = async (data) => {
     try {
-      const response = await Auth.confirmSignUp(data.email, data.code);
+      const response = await Auth.forgotPassword(data.email);
       console.log(response);
-      navigation.popToTop();
+      navigation.navigate("NewPassword", { email: data.email });
     } catch (error) {
       Alert.alert("Oops", error.message);
     }
   };
 
-  const onResendPressed = async () => {
-    try {
-      const response = await Auth.resendSignUp(email);
-      Alert.alert("Success", "Code resent");
-    } catch (error) {
-      Alert.alert("Oops", error.message);
-    }
-  };
+  //   const onResendPressed = async () => {
+  //     try {
+  //       const response = await Auth.resendSignUp(email);
+  //       Alert.alert("Success", "Code resent");
+  //     } catch (error) {
+  //       Alert.alert("Oops", error.message);
+  //     }
+  //   };
   const onSignInPressed = () => {
     console.warn("Sign in");
     navigation.navigate("SignIn");
@@ -54,7 +50,7 @@ const ConfirmEmail = () => {
   const [ConfirmPassword, setConfirmPassword] = useState("");
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Confirm your email</Text>
+      <Text style={styles.title}>Reset your password</Text>
       <View style={styles.container}>
         <CustomInput
           name="email"
@@ -62,23 +58,9 @@ const ConfirmEmail = () => {
           control={control}
           rules={{ required: "Email is required" }}
         />
-        <CustomInput
-          name="code"
-          placeholder="Enter your confirmation code"
-          control={control}
-          rules={{ required: "Confirmation code is required" }}
-        />
 
-        <CustomButton onPress={handleSubmit(onConfirmPressed)} text="Confirm" />
+        <CustomButton onPress={handleSubmit(onSendPressed)} text="Send" />
         <View style={styles.btnContainer}>
-          <View>
-            <CustomButton
-              text="Resend code"
-              type="SECONDARY"
-              onPress={onResendPressed}
-            />
-          </View>
-
           <View>
             <CustomButton
               text="Back to Sign in"
@@ -140,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ConfirmEmail;
+export default ResetPassword;

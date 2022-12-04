@@ -4,6 +4,7 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import Logo from "../../../assets/images/logo.png";
@@ -12,12 +13,15 @@ import CustomButton from "../../components/CustomButton";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
+import { Amplify, Auth } from "aws-amplify";
+import { useRoute } from "@react-navigation/native";
 
 import { myColors } from "../../../colors";
 
 import { useFonts, Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
 
 const SignIn = () => {
+  const route = useRoute();
   // const [fontsLoaded] = useFonts({
   //   rrr: Rubik_800ExtraBold,
   // });
@@ -25,19 +29,35 @@ const SignIn = () => {
   // if (!fontsLoaded) {
   //   return null;
   // }
-  const { control, handleSubmit } = useForm();
+  const [loading, setLoading] = useState(false);
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      email: route?.params?.email,
+    },
+  });
   const navigation = useNavigation();
 
-  const onSignInPressed = (data) => {
-    console.log(data);
-    console.warn("Sign in");
+  const onSignInPressed = async (data) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const response = await Auth.signIn(data.email.trim(), data.password);
+      console.log(response);
+      navigation.navigate("Home");
+    } catch (error) {
+      Alert.alert("Oops", error.message);
+    } finally {
+      setLoading(false);
+    }
+    // console.log(data);
+    // console.warn("Sign in");
   };
   const onSingUpPressed = () => {
     console.warn("Sign up");
     navigation.navigate("SignUp");
   };
   const onForgotPasswordPressed = () => {
-    console.warn("Forgot Password");
+    navigation.navigate("ResetPassword");
   };
 
   const [Email, setEmail] = useState("");
@@ -64,8 +84,12 @@ const SignIn = () => {
               message: "Password must be minimun 6 character long",
             },
           }}
+          secure={true}
         />
-        <CustomButton onPress={handleSubmit(onSignInPressed)} text="Sign In" />
+        <CustomButton
+          onPress={handleSubmit(onSignInPressed)}
+          text={loading ? "Loading..." : "Sign In"}
+        />
         <Text style={styles.forgot} onPress={onForgotPasswordPressed}>
           Forgot Password ?
         </Text>

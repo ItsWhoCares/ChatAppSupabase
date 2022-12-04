@@ -11,6 +11,7 @@ import {
   Platform,
   StatusBar,
   TextInput,
+  ScrollView,
 } from "react-native";
 import React, { useState, useCallback } from "react";
 import SignIn from "./src/screens/SignIn/SignIn";
@@ -23,7 +24,14 @@ import { myColors } from "./colors";
 import { useFonts } from "expo-font";
 import { Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
 
-export default function App() {
+import { Amplify, Auth } from "aws-amplify";
+import awsconfig from "./src/aws-exports";
+
+Amplify.configure(awsconfig);
+
+const App = () => {
+  // Auth.signOut();
+
   // const [fontsLoaded] = useFonts({
   //   rr: Rubik_800ExtraBold,
   // });
@@ -37,7 +45,7 @@ export default function App() {
       <Navigation />
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   root: {
@@ -45,3 +53,5 @@ const styles = StyleSheet.create({
     backgroundColor: myColors.pbgc,
   },
 });
+
+export default App;

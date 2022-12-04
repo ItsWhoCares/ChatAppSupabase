@@ -4,7 +4,7 @@ import { myColors } from "../../../colors";
 import { useFonts, Rubik_400Regular } from "@expo-google-fonts/rubik";
 import { Controller } from "react-hook-form";
 
-const CustomInput = ({ control, name, rules = {}, placeholder }) => {
+const CustomInput = ({ control, name, secure, rules = {}, placeholder }) => {
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
   });
@@ -29,7 +29,7 @@ const CustomInput = ({ control, name, rules = {}, placeholder }) => {
               onChangeText={onChange}
               value={value}
               placeholder={placeholder}
-              secureTextEntry={placeholder === "Password" ? true : false}
+              secureTextEntry={secure}
             />
           </View>
           {error && (

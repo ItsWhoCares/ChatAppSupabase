@@ -15,37 +15,36 @@ import { useForm } from "react-hook-form";
 import { useRoute } from "@react-navigation/native";
 import { Auth } from "aws-amplify";
 
-const ConfirmEmail = () => {
+const NewPassword = () => {
   const route = useRoute();
-  const { control, handleSubmit, watch } = useForm({
-    defaultValues: {
-      email: route?.params?.email,
-    },
-  });
+  const { control, handleSubmit, watch } = useForm();
 
-  const email = watch("email");
+  const email = route?.params?.email;
+  const pwd = watch("password");
   const navigation = useNavigation();
 
-  const onConfirmPressed = async (data) => {
+  const onSubmitPressed = async (data) => {
     try {
-      const response = await Auth.confirmSignUp(data.email, data.code);
-      console.log(response);
+      const response = await Auth.forgotPasswordSubmit(
+        email,
+        data.code,
+        data.password
+      );
       navigation.popToTop();
     } catch (error) {
       Alert.alert("Oops", error.message);
     }
   };
 
-  const onResendPressed = async () => {
-    try {
-      const response = await Auth.resendSignUp(email);
-      Alert.alert("Success", "Code resent");
-    } catch (error) {
-      Alert.alert("Oops", error.message);
-    }
-  };
+  //   const onResendPressed = async () => {
+  //     try {
+  //       const response = await Auth.resendSignUp(email);
+  //       Alert.alert("Success", "Code resent");
+  //     } catch (error) {
+  //       Alert.alert("Oops", error.message);
+  //     }
+  //   };
   const onSignInPressed = () => {
-    console.warn("Sign in");
     navigation.navigate("SignIn");
   };
 
@@ -54,14 +53,8 @@ const ConfirmEmail = () => {
   const [ConfirmPassword, setConfirmPassword] = useState("");
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Confirm your email</Text>
+      <Text style={styles.title}>Reset your password</Text>
       <View style={styles.container}>
-        <CustomInput
-          name="email"
-          placeholder="Email"
-          control={control}
-          rules={{ required: "Email is required" }}
-        />
         <CustomInput
           name="code"
           placeholder="Enter your confirmation code"
@@ -69,16 +62,32 @@ const ConfirmEmail = () => {
           rules={{ required: "Confirmation code is required" }}
         />
 
-        <CustomButton onPress={handleSubmit(onConfirmPressed)} text="Confirm" />
-        <View style={styles.btnContainer}>
-          <View>
-            <CustomButton
-              text="Resend code"
-              type="SECONDARY"
-              onPress={onResendPressed}
-            />
-          </View>
+        <CustomInput
+          name="password"
+          placeholder="Enter your new password"
+          control={control}
+          rules={{
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters",
+            },
+          }}
+          secure={true}
+        />
+        <CustomInput
+          name="confirmPassword"
+          placeholder="Confirm new Password"
+          control={control}
+          rules={{
+            required: "Passwords do not match",
+            validate: (value) => value === pwd || "Passwords do not match",
+          }}
+          secure={true}
+        />
 
+        <CustomButton onPress={handleSubmit(onSubmitPressed)} text="Submit" />
+        <View style={styles.btnContainer}>
           <View>
             <CustomButton
               text="Back to Sign in"
@@ -140,4 +149,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ConfirmEmail;
+export default NewPassword;
