@@ -1,5 +1,5 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -10,18 +10,53 @@ import ConfirmEmail from "../../screens/ConfirmEmail";
 import Home from "../../screens/Home";
 import ResetPassword from "../../screens/ResetPassword";
 import NewPassword from "../../screens/NewPassword";
+import { Auth, Hub } from "aws-amplify";
 
 const Navigation = () => {
+  const [user, setUser] = useState(undefined);
+  const checkUser = async () => {
+    try {
+      const user = await Auth.currentAuthenticatedUser({ bypassCache: true });
+      setUser(user);
+    } catch (error) {
+      setUser(null);
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    checkUser();
+  }, []);
+  useEffect(() => {
+    const listener = Hub.listen("auth", (data) => {
+      if (data.payload.event === "signIn" || data.payload.event === "signOut") {
+        checkUser();
+      }
+    });
+    return () => {
+      listener();
+    };
+  }, []);
+  if (user === undefined)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
   const Stack = createNativeStackNavigator();
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="SignIn" component={SignIn} />
-        <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="ConfirmEmail" component={ConfirmEmail} />
-        <Stack.Screen name="ResetPassword" component={ResetPassword} />
-        <Stack.Screen name="NewPassword" component={NewPassword} />
+        {user ? (
+          <Stack.Screen name="Home" component={Home} />
+        ) : (
+          <>
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name="ConfirmEmail" component={ConfirmEmail} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            <Stack.Screen name="NewPassword" component={NewPassword} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

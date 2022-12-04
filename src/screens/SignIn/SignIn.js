@@ -42,7 +42,6 @@ const SignIn = () => {
     setLoading(true);
     try {
       const response = await Auth.signIn(data.email.trim(), data.password);
-      console.log(response);
       navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Oops", error.message);
