@@ -4,7 +4,14 @@ import { myColors } from "../../../colors";
 import { useFonts, Rubik_400Regular } from "@expo-google-fonts/rubik";
 import { Controller } from "react-hook-form";
 
-const CustomInput = ({ control, name, secure, rules = {}, placeholder }) => {
+const CustomInput = ({
+  control,
+  name,
+  secure,
+  rules = {},
+  placeholder,
+  autoFocus = false,
+}) => {
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
   });
@@ -24,6 +31,7 @@ const CustomInput = ({ control, name, secure, rules = {}, placeholder }) => {
         <>
           <View style={[styles.container, error ? styles.container_error : {}]}>
             <TextInput
+              autoFocus={autoFocus}
               style={styles.text}
               onBlur={onBlur}
               onChangeText={onChange}
@@ -46,7 +54,7 @@ const CustomInput = ({ control, name, secure, rules = {}, placeholder }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: myColors.input,
+    backgroundColor: myColors.inputBox,
     width: "100%",
     height: 50,
     paddingVertical: 10,
@@ -62,6 +70,7 @@ const styles = StyleSheet.create({
 
   text: {
     fontSize: 15,
+    color: myColors.inputBoxText,
     // fontFamily: "Rubik_400Regular",
   },
 });

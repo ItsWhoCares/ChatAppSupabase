@@ -41,7 +41,7 @@ const App = () => {
   // }
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar backgroundColor={"#30475e"} style="auto" />
+      <StatusBar backgroundColor={"black"} style="auto" />
       <Navigation />
     </SafeAreaView>
   );

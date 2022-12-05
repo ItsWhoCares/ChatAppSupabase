@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useState } from "react";
-import Logo from "../../../assets/images/logo.png";
+import Logo from "../../../assets/images/WhoCares.png";
 import CustomInput from "../../components/CustomInput/CustomInput";
 import CustomButton from "../../components/CustomButton";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
@@ -63,10 +63,11 @@ const SignIn = () => {
   const [Password, setPassword] = useState("");
   const { width, height } = useWindowDimensions();
   return (
-    <View style={styles.root}>
-      <Image source={Logo} style={[styles.logo, { height: height * 0.2 }]} />
+    <View style={[styles.root, { height: height * 0.2 }]}>
+      <Text style={styles.logoText}>WhoCares!</Text>
       <View style={styles.container}>
         <CustomInput
+          autoFocus={true}
           name="email"
           placeholder="Email"
           control={control}
@@ -95,7 +96,8 @@ const SignIn = () => {
       </View>
       <SocialSignInButtons />
       <Text style={styles.forgot} onPress={onSingUpPressed}>
-        Don't have an account? Create one
+        Don't have an account?{" "}
+        <Text style={{ color: myColors.primaryBtn }}>Sign Up</Text>
       </Text>
     </View>
   );
@@ -109,9 +111,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: "40%",
+    width: "100%",
     maxWidth: 300,
     maxHeight: 200,
+  },
+  logoText: {
+    paddingVertical: 20,
+    color: "white",
+    fontSize: 56,
+    // fontWeight: "bold",
   },
   container: {
     width: "100%",
@@ -130,7 +138,7 @@ const styles = StyleSheet.create({
     color: "white",
     width: "100%",
     textAlign: "center",
-    textDecorationLine: "underline",
+    // textDecorationLine: "underline",
     // textDecorationColor: "white",
   },
 });

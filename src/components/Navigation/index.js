@@ -10,6 +10,7 @@ import ConfirmEmail from "../../screens/ConfirmEmail";
 import Home from "../../screens/Home";
 import ResetPassword from "../../screens/ResetPassword";
 import NewPassword from "../../screens/NewPassword";
+import ChatRoom from "../../screens/ChatRoom";
 import { Auth, Hub } from "aws-amplify";
 
 const Navigation = () => {
@@ -47,7 +48,10 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Home" component={Home} />
+          <>
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="ChatRoom" component={ChatRoom} />
+          </>
         ) : (
           <>
             <Stack.Screen name="SignIn" component={SignIn} />

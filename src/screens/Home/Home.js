@@ -1,23 +1,37 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import React from "react";
 import { Auth } from "aws-amplify";
+import CustomText from "../../components/CustomText";
+import ChatListItem from "../../components/ChatListItem";
+import { myColors } from "../../../colors";
+import { useNavigation } from "@react-navigation/native";
 
 const Home = () => {
+  const navigation = useNavigation();
   const onSignOutPressed = () => {
     Auth.signOut();
   };
-  return (
-    <View style={{ flex: 1, backgroundColor: "dark" }}>
-      <Text
-        style={{
-          fontSize: 20,
 
-          fontWeight: "bold",
-          textAlign: "center",
-          margin: 10,
-        }}>
-        Hi PAGAL
-      </Text>
+  const chat = {
+    user: {
+      id: "1",
+      img: "../../../assets/images/BlankProfile.png",
+      name: "John Doe",
+      lastMessage: "Hello",
+      time: "12:00",
+    },
+  };
+
+  const onChatPressed = () => {
+    console.log("Chat pressed");
+    navigation.navigate("ChatRoom");
+  };
+  return (
+    // <ScrollView style={{ flex: 1, height: "100%" }}>
+    <View style={styles.root}>
+      <ChatListItem chat={chat} onPress={onChatPressed} />
+      <ChatListItem chat={chat} onPress={onChatPressed} />
+
       <Text
         style={{
           color: "red",
@@ -32,7 +46,19 @@ const Home = () => {
         Sign Out
       </Text>
     </View>
+    // </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: myColors.pbgc,
+    paddingVertical: 10,
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default Home;

@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   container_pressed_PRIMARY: {
-    backgroundColor: "#ddd",
+    backgroundColor: myColors.primaryBtnPressed,
     width: "100%",
     alignItems: "center",
     padding: 15,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   container_SECONDARY: {
     borderWidth: 2,
-    backgroundColor: "#30475E",
+    backgroundColor: "#00000080",
     width: "100%",
     alignItems: "center",
     padding: 15,
@@ -86,13 +86,13 @@ const styles = StyleSheet.create({
   },
   text_PRIMARY: {
     fontWeight: "bold",
-    color: "white",
+    color: myColors.primaryBtnText,
     fontSize: 15,
     // fontFamily: "Rubik",
   },
   text_pressed_PRIMARY: {
     fontWeight: "bold",
-    color: "#222831",
+    color: myColors.primaryBtnTextPressed,
     fontSize: 15,
   },
   text_SECONDARY: {
