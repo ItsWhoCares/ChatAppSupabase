@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
   },
   btnContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
+    // alignItems: "center",
+    justifyContent: "space-between",
   },
 });
 

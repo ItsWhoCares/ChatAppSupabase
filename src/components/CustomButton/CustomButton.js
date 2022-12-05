@@ -67,17 +67,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   container_SECONDARY: {
-    borderWidth: 2,
+    // borderWidth: 2,
     backgroundColor: "#00000080",
     width: "100%",
     alignItems: "center",
     padding: 15,
     marginVertical: 5,
-    borderRadius: 5,
-    borderColor: myColors.primaryBtn,
+    // borderRadius: 5,
+    // borderColor: myColors.primaryBtn,
   },
   container_pressed_SECONDARY: {
-    backgroundColor: "#ddd",
+    backgroundColor: myColors.secondaryBtnPressed,
     width: "100%",
     alignItems: "center",
     padding: 15,
@@ -97,13 +97,13 @@ const styles = StyleSheet.create({
   },
   text_SECONDARY: {
     fontWeight: "bold",
-    color: myColors.primaryBtn,
+    color: myColors.secondaryBtnText,
     fontSize: 15,
     // fontFamily: "Rubik",
   },
   text_pressed_SECONDARY: {
     fontWeight: "bold",
-    color: "#222831",
+    color: myColors.secondaryBtnTextPressed,
     fontSize: 15,
   },
 });

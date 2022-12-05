@@ -56,6 +56,7 @@ const SignUp = () => {
     }
   };
   const onTermsPressed = () => {
+    navigation.navigate("ConfirmEmail");
     console.warn("Terms");
   };
 

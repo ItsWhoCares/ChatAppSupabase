@@ -8,7 +8,9 @@ module.exports.myColors = {
   primaryBtnText: "white",
   primaryBtnTextPressed: "white",
   secondaryBtn: "#30475E",
-  secondaryBtnText: "#30475E",
+  secondaryBtnPressed: "#303134",
+  secondaryBtnText: "#0095F6",
+  secondaryBtnTextPressed: "#0095F6",
 };
 
 // module.exports.myColors = {

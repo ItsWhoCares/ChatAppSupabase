@@ -41,7 +41,7 @@ const App = () => {
   // }
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar backgroundColor={"black"} style="auto" />
+      <StatusBar backgroundColor={"black"} />
       <Navigation />
     </SafeAreaView>
   );
@@ -50,6 +50,7 @@ const App = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     backgroundColor: myColors.pbgc,
   },
 });
