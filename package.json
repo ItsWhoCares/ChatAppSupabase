@@ -22,6 +22,7 @@
     "amazon-cognito-identity-js": "^6.0.1",
     "aws-amplify": "^5.0.4",
     "aws-amplify-react-native": "^7.0.1",
+    "dayjs": "^1.11.7",
     "expo": "~47.0.8",
     "expo-app-loading": "~2.1.1",
     "expo-font": "~11.0.1",

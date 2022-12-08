@@ -1,6 +1,9 @@
 module.exports.myColors = {
   pbgc: "black",
   sbgc: "black",
+  secondaryText: "#707271",
+  PrimaryMessage: "#fccc63", //"#4c68d7",
+  SecondaryMessage: "#303134",
   inputBox: "#303134",
   inputBoxText: "white",
   primaryBtn: "#0095F6",

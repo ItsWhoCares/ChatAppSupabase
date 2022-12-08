@@ -1,6 +1,10 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { myColors } from "../../../colors";
+dayjs.extend(relativeTime);
 
 const ChatListItem = ({ chat, onPress }) => {
   // const chat = props.chat;
@@ -8,21 +12,18 @@ const ChatListItem = ({ chat, onPress }) => {
 
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <Image
-        style={styles.image}
-        source={require("../../../assets/images/BlankProfile.png")}
-      />
+      <Image style={styles.image} source={{ uri: chat.user.image }} />
       <View style={styles.content}>
         <View style={styles.row}>
           <Text numberOfLines={1} style={styles.name}>
             {chat.user.name}
           </Text>
           <Text numberOfLines={2} style={styles.subTitle}>
-            {chat.user.time}
+            {dayjs(chat.lastMessage.createdAt).fromNow(true)}
           </Text>
         </View>
 
-        <Text style={styles.subTitle}>{chat.user.lastMessage}</Text>
+        <Text style={styles.subTitle}>{chat.lastMessage.text}</Text>
       </View>
     </Pressable>
   );
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   subTitle: {
-    color: "#707271",
+    color: myColors.secondaryText,
   },
 });
 
