@@ -18,6 +18,8 @@ const Message = ({ message }) => {
             ? myColors.PrimaryMessage
             : myColors.SecondaryMessage,
           alignSelf: isMyMessage() ? "flex-end" : "flex-start",
+          borderBottomRightRadius: isMyMessage() ? 4 : 10,
+          borderBottomLeftRadius: isMyMessage() ? 10 : 4,
         },
       ]}>
       <Text style={styles.text}>{message.text}</Text>

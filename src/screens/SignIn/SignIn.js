@@ -42,7 +42,7 @@ const SignIn = () => {
     setLoading(true);
     try {
       const response = await Auth.signIn(data.email.trim(), data.password);
-      navigation.navigate("Home");
+      await navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Oops", error.message);
     } finally {

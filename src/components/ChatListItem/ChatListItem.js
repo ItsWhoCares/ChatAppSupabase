@@ -7,11 +7,20 @@ import { myColors } from "../../../colors";
 dayjs.extend(relativeTime);
 
 const ChatListItem = ({ chat, onPress }) => {
+  const navigation = useNavigation();
   // const chat = props.chat;
   //   console.log(chat);
 
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable
+      style={styles.container}
+      onPress={() =>
+        navigation.navigate("ChatRoom", {
+          id: chat.id,
+          name: chat.user.name,
+          image: chat.user.image,
+        })
+      }>
       <Image style={styles.image} source={{ uri: chat.user.image }} />
       <View style={styles.content}>
         <View style={styles.row}>

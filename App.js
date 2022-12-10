@@ -24,10 +24,12 @@ import { myColors } from "./colors";
 import { useFonts } from "expo-font";
 import { Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
 
+import * as NavigationBar from "expo-navigation-bar";
+
 import { Amplify, Auth } from "aws-amplify";
 import awsconfig from "./src/aws-exports";
 
-Amplify.configure(awsconfig);
+Amplify.configure({ awsconfig, Analytics: { disabled: true } });
 
 const App = () => {
   // Auth.signOut();
@@ -39,6 +41,7 @@ const App = () => {
   // if (!fontsLoaded) {
   //   return null;
   // }
+  NavigationBar.setBackgroundColorAsync("black");
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar barStyle={"light-content"} backgroundColor={"black"} />

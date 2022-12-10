@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -12,6 +12,8 @@ import ResetPassword from "../../screens/ResetPassword";
 import NewPassword from "../../screens/NewPassword";
 import ChatRoom from "../../screens/ChatRoom";
 import { Auth, Hub } from "aws-amplify";
+import { myColors } from "../../../colors";
+import Settings from "../../screens/Settings";
 
 const Navigation = () => {
   const [user, setUser] = useState(undefined);
@@ -46,24 +48,52 @@ const Navigation = () => {
   const Stack = createNativeStackNavigator();
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: true,
+        }}>
         {user ? (
           <>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="ChatRoom" component={ChatRoom} />
+            <Stack.Screen name="Settings" component={Settings} />
           </>
         ) : (
           <>
-            <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="SignUp" component={SignUp} />
-            <Stack.Screen name="ConfirmEmail" component={ConfirmEmail} />
-            <Stack.Screen name="ResetPassword" component={ResetPassword} />
-            <Stack.Screen name="NewPassword" component={NewPassword} />
+            <Stack.Screen
+              name="SignIn"
+              component={SignIn}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ConfirmEmail"
+              component={ConfirmEmail}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPassword}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="NewPassword"
+              component={NewPassword}
+              options={{ headerShown: false }}
+            />
           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {},
+});
 
 export default Navigation;
