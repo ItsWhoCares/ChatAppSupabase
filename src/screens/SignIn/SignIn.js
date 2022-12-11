@@ -19,7 +19,7 @@ import { useRoute } from "@react-navigation/native";
 import { myColors } from "../../../colors";
 
 import { useFonts, Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
-
+import { syncUser } from "../../../dbhelper";
 const SignIn = () => {
   const route = useRoute();
   // const [fontsLoaded] = useFonts({
@@ -42,6 +42,7 @@ const SignIn = () => {
     setLoading(true);
     try {
       const response = await Auth.signIn(data.email.trim(), data.password);
+      syncUser();
       await navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Oops", error.message);

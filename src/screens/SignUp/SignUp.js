@@ -15,6 +15,7 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import { Auth } from "aws-amplify";
 
+
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
 const onPrivacyPressed = () => {

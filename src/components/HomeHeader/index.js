@@ -8,9 +8,13 @@ const HomeHeader = () => {
   const onSettingsPressed = () => {
     navigation.navigate("Settings");
   };
+  const onSearchPressed = () => {
+    navigation.navigate("Search");
+  };
   return (
     <>
       <AntDesign
+        onPress={onSearchPressed}
         name="search1"
         size={24}
         color="white"

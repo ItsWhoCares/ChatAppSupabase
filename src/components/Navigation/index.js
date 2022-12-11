@@ -14,6 +14,7 @@ import ChatRoom from "../../screens/ChatRoom";
 import { Auth, Hub } from "aws-amplify";
 import { myColors } from "../../../colors";
 import Settings from "../../screens/Settings";
+import Search from "../../screens/Search";
 
 const Navigation = () => {
   const [user, setUser] = useState(undefined);
@@ -56,6 +57,7 @@ const Navigation = () => {
           <>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="ChatRoom" component={ChatRoom} />
+            <Stack.Screen name="Search" component={Search} />
             <Stack.Screen name="Settings" component={Settings} />
           </>
         ) : (
