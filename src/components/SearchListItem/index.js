@@ -1,6 +1,11 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
+
+import { API, graphqlOperation, Auth } from "aws-amplify";
+import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
+import { getCommonChatRoom } from "../../../dbhelper";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { myColors } from "../../../colors";
@@ -8,16 +13,70 @@ dayjs.extend(relativeTime);
 
 const SearchListItem = ({ user }) => {
   const navigation = useNavigation();
-  return (
-    <Pressable
-      style={styles.container}
-      onPress={() =>
-        navigation.navigate("ChatRoom", {
+  const onPress = async () => {
+    //Check if the user is already in the chat room
+    const existingChatRoom = await getCommonChatRoom(user.id);
+    // console.log(existingChatRoom);
+    if (existingChatRoom) {
+      console.log("existing");
+      navigation.navigate("ChatRoom", {
+        id: existingChatRoom.id,
+        user: {
           id: user.id,
           name: user.name,
           image: user.image,
-        })
-      }>
+        },
+      });
+      return;
+    }
+    //If not, create a new chat room
+    const newChatRoomData = await API.graphql(
+      graphqlOperation(createChatRoom, { input: {} })
+    );
+
+    // console.log(newChatRoomData);
+
+    if (!newChatRoomData.data?.createChatRoom) {
+      console.log("Failed to create a chat room");
+      return;
+    }
+
+    const newChatRoom = newChatRoomData.data?.createChatRoom;
+    console.log(newChatRoom);
+    //Add the user to the chat room
+    await API.graphql(
+      graphqlOperation(createUserChatRoom, {
+        input: {
+          chatRoomId: newChatRoom.id,
+          userId: user.id,
+        },
+      })
+    );
+
+    //Add the authenticated user to the chat room
+    const userInfo = await Auth.currentAuthenticatedUser();
+    await API.graphql(
+      graphqlOperation(createUserChatRoom, {
+        input: {
+          chatRoomId: newChatRoom.id,
+          userId: userInfo.attributes.sub,
+        },
+      })
+    );
+    console.log("new");
+    // Navigate to the chat room
+    navigation.navigate("ChatRoom", {
+      id: newChatRoom.id,
+      user: {
+        id: user.id,
+        name: user.name,
+        image: user.image,
+      },
+    });
+  };
+
+  return (
+    <Pressable style={styles.container} onPress={onPress}>
       <Image style={styles.image} source={{ uri: user.image }} />
       <View style={styles.content}>
         <View style={styles.row}>

@@ -25,7 +25,6 @@ const ResetPassword = () => {
   const onSendPressed = async (data) => {
     try {
       const response = await Auth.forgotPassword(data.email);
-      console.log(response);
       navigation.navigate("NewPassword", { email: data.email });
     } catch (error) {
       Alert.alert("Oops", error.message);

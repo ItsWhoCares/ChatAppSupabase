@@ -29,7 +29,6 @@ const ConfirmEmail = () => {
   const onConfirmPressed = async (data) => {
     try {
       const response = await Auth.confirmSignUp(data.email, data.code);
-      console.log(response);
       navigation.popToTop();
     } catch (error) {
       Alert.alert("Oops", error.message);

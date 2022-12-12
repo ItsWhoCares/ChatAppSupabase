@@ -49,8 +49,6 @@ const SignIn = () => {
     } finally {
       setLoading(false);
     }
-    // console.log(data);
-    // console.warn("Sign in");
   };
   const onSingUpPressed = () => {
     console.warn("Sign up");

@@ -2,14 +2,44 @@ import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { myColors } from "../../../colors";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { API, graphqlOperation, Auth } from "aws-amplify";
+import { createMessage, updateChatRoom } from "../../graphql/mutations";
 
-const ChatInput = () => {
+const ChatInput = ({ chatRoom }) => {
   const [message, setMessage] = useState("");
 
-  const handleSend = () => {
+  const handleSend = async () => {
     // send the message to the chat server
     console.warn(`Sending: ${message}`);
-    setMessage("");
+
+    // send the message to the backend
+    try {
+      const userInfo = await Auth.currentAuthenticatedUser();
+      const newMessage = {
+        chatroomID: chatRoom.id,
+        text: message,
+        userID: userInfo.attributes.sub,
+      };
+      const newMessageData = await API.graphql(
+        graphqlOperation(createMessage, { input: newMessage })
+      );
+
+      setMessage("");
+
+      // update the last message in the chat room
+
+      await API.graphql(
+        graphqlOperation(updateChatRoom, {
+          input: {
+            _version: chatRoom._version,
+            id: chatRoom.id,
+            chatRoomLastMessageId: newMessageData.data.createMessage.id,
+          },
+        })
+      );
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

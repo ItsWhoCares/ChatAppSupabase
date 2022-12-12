@@ -5,9 +5,10 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { myColors } from "../../../colors";
 dayjs.extend(relativeTime);
 
-const Message = ({ message }) => {
+const Message = ({ message, authUser }) => {
+  // console.log(authUser);
   const isMyMessage = () => {
-    return message.user.id === "u1";
+    return message?.userID === authUser;
   };
   return (
     <View

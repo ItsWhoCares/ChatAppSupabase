@@ -1,15 +1,30 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { myColors } from "../../../colors";
+import { Auth } from "aws-amplify";
 dayjs.extend(relativeTime);
 
 const ChatListItem = ({ chat, onPress }) => {
   const navigation = useNavigation();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const authUser = await Auth.currentAuthenticatedUser();
+      const userItem = chat.users.items.find(
+        (item) => item.user.id !== authUser.attributes.sub
+      );
+      setUser(userItem?.user);
+    };
+    fetchUser();
+  }, []);
   // const chat = props.chat;
   //   console.log(chat);
+
+  //check for not Auth user
 
   return (
     <Pressable
@@ -17,22 +32,27 @@ const ChatListItem = ({ chat, onPress }) => {
       onPress={() =>
         navigation.navigate("ChatRoom", {
           id: chat.id,
-          name: chat.user.name,
-          image: chat.user.image,
+          user: {
+            id: user.id,
+            name: user.name,
+            image: user.image,
+          },
         })
       }>
-      <Image style={styles.image} source={{ uri: chat.user.image }} />
+      <Image style={styles.image} source={{ uri: user?.image }} />
       <View style={styles.content}>
         <View style={styles.row}>
           <Text numberOfLines={1} style={styles.name}>
-            {chat.user.name}
+            {user?.name}
           </Text>
-          <Text numberOfLines={2} style={styles.subTitle}>
-            {dayjs(chat.lastMessage.createdAt).fromNow(true)}
-          </Text>
+          {chat.LastMessage && (
+            <Text numberOfLines={2} style={styles.subTitle}>
+              {dayjs(chat.LastMessage?.createdAt).fromNow(true)}
+            </Text>
+          )}
         </View>
 
-        <Text style={styles.subTitle}>{chat.lastMessage.text}</Text>
+        <Text style={styles.subTitle}>{chat.LastMessage?.text}</Text>
       </View>
     </Pressable>
   );

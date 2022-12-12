@@ -8,7 +8,6 @@ import ChatInput from "../../components/ChatInput";
 
 import { API, graphqlOperation } from "aws-amplify";
 import { searchUsers, listUsers } from "../../graphql/queries";
-
 const Search = () => {
   const navigation = useNavigation();
   const [SearchText, setSearchText] = React.useState("");
@@ -53,7 +52,6 @@ const Search = () => {
       try {
         API.graphql(graphqlOperation(listUsers)).then((res) => {
           setUsers(res.data.listUsers.items);
-          // console.log(res.data.listUsers.items[0].status);
         });
         // console.log(users);
       } catch (e) {

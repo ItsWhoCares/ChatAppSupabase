@@ -1,5 +1,12 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import React from "react";
 import { useRoute } from "@react-navigation/native";
 import Message from "../../components/Message";
@@ -8,12 +15,22 @@ import messages from "../../../src/data/messages";
 import { myColors } from "../../../colors";
 import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../../components/CustomHeader";
+import { Auth, API, graphqlOperation } from "aws-amplify";
+import { getChatRoom, listMessagesByChatRoom } from "../../graphql/queries";
 
 const ChatRoom = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const [chatRoom, setChatRoom] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  useEffect(() => {
+    Auth.currentAuthenticatedUser().then((user) => setAuthUser(user));
+    // console.log(authUser?.attributes?.sub);
+  }, [chatRoom]);
 
-  const user = route.params;
+  const user = route.params?.user;
+  const chatRoomId = route.params?.id;
 
   useEffect(() => {
     navigation.setOptions({
@@ -27,20 +44,57 @@ const ChatRoom = () => {
         // marginLeft: 10,
       },
       // headerBackImageSource: user.image,
-      headerLeft: () => <CustomHeader image={user.image} />,
+      headerLeft: () => <CustomHeader image={user?.image} />,
     });
   }, [user.name]);
   // const msg = messages.filter((m) => m.chatId === id);
+
+  //chat room info
+  useEffect(() => {
+    API.graphql(graphqlOperation(getChatRoom, { id: chatRoomId })).then(
+      (result) => setChatRoom(result.data?.getChatRoom)
+    );
+  }, [chatRoomId]);
+
+  //fetch messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const messagesData = await API.graphql(
+          graphqlOperation(listMessagesByChatRoom, {
+            chatroomID: chatRoomId,
+            sortDirection: "DESC",
+          })
+        );
+        setMessages(messagesData.data.listMessagesByChatRoom?.items);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchMessages();
+  }, [chatRoomId]);
+
+  // console.log(chatRoom);
+
+  if (!chatRoom) {
+    return (
+      <View style={styles.root}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
   return (
     <View style={styles.root}>
       <FlatList
         data={messages}
-        renderItem={({ item }) => <Message message={item} />}
+        renderItem={({ item }) => (
+          <Message message={item} authUser={authUser.attributes?.sub} />
+        )}
         style={styles.list}
         inverted
       />
       <View style={{ paddingTop: 10 }}>
-        <ChatInput />
+        <ChatInput chatRoom={chatRoom} />
       </View>
     </View>
   );
