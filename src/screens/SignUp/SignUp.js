@@ -15,7 +15,6 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import { Auth } from "aws-amplify";
 
-
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
 const onPrivacyPressed = () => {
@@ -136,7 +135,8 @@ const SignUp = () => {
         </View>
         <SocialSignInButtons />
         <Text style={styles.link} onPress={onSignInPressed}>
-          Already have an account? Sign In
+          Already have an account?{" "}
+          <Text style={{ color: myColors.primaryBtn }}>Sign In</Text>
         </Text>
       </View>
     </ScrollView>
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
     color: "white",
     width: "100%",
     textAlign: "center",
-    textDecorationLine: "underline",
-    textDecorationColor: "white",
+    // textDecorationLine: "underline",
+    // textDecorationColor: "white",
   },
   title: {
     fontSize: 24,
