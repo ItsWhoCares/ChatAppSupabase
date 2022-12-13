@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../../components/CustomHeader";
 import { Auth, API, graphqlOperation } from "aws-amplify";
 import { getChatRoom, listMessagesByChatRoom } from "../../graphql/queries";
+import { onCreateMessage } from "../../graphql/subscriptions";
+import { set } from "react-hook-form";
 
 const ChatRoom = () => {
   const route = useRoute();
@@ -72,6 +74,23 @@ const ChatRoom = () => {
       }
     };
     fetchMessages();
+
+    //subscribe to new messages
+    const subscription = API.graphql(
+      graphqlOperation(onCreateMessage, {
+        filter: { chatroomID: { eq: chatRoomId } },
+      })
+    ).subscribe({
+      next: ({ value }) => {
+        setMessages((prevMessages) => [
+          value.data.onCreateMessage,
+          ...prevMessages,
+        ]);
+      },
+      error: (error) => console.log(error),
+    });
+
+    return () => subscription.unsubscribe();
   }, [chatRoomId]);
 
   // console.log(chatRoom);

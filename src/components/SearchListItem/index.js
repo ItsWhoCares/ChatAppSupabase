@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { API, graphqlOperation, Auth } from "aws-amplify";
@@ -13,6 +13,16 @@ dayjs.extend(relativeTime);
 
 const SearchListItem = ({ user }) => {
   const navigation = useNavigation();
+  const [authUser, setAuthUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userInfo = await Auth.currentAuthenticatedUser();
+      setAuthUser(userInfo?.attributes?.sub);
+    };
+    fetchUser();
+  }, []);
+
   const onPress = async () => {
     //Check if the user is already in the chat room
     const existingChatRoom = await getCommonChatRoom(user.id);
@@ -74,6 +84,9 @@ const SearchListItem = ({ user }) => {
       },
     });
   };
+  if (authUser == user.id) {
+    return null;
+  }
 
   return (
     <Pressable style={styles.container} onPress={onPress}>

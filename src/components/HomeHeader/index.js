@@ -2,7 +2,8 @@ import { View, Text } from "react-native";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-
+import { API, graphqlOperation } from "aws-amplify";
+import { deleteChatRoom } from "../../graphql/mutations";
 const HomeHeader = () => {
   const navigation = useNavigation();
   const onSettingsPressed = () => {

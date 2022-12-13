@@ -47,17 +47,21 @@ const Search = () => {
   }, [SearchText]);
 
   const [users, setUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      API.graphql(graphqlOperation(listUsers)).then((res) => {
+        setUsers(res.data.listUsers.items);
+      });
+      // console.log(users);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        API.graphql(graphqlOperation(listUsers)).then((res) => {
-          setUsers(res.data.listUsers.items);
-        });
-        // console.log(users);
-      } catch (e) {
-        console.log(e);
-      }
-    };
     fetchUsers();
     //list all users
     // const fetchUsers = async () => {
@@ -84,6 +88,8 @@ const Search = () => {
       <FlatList
         data={users}
         renderItem={({ item }) => <SearchListItem user={item} />}
+        onRefresh={fetchUsers}
+        refreshing={loading}
       />
     </View>
   );
