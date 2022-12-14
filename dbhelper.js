@@ -4,7 +4,7 @@ import { createUser } from "./src/graphql/mutations";
 
 export const syncUser = async () => {
   // get Auth user
-  console.log("Syncing user");
+  // console.log("Syncing user");
   try {
     const authUser = await Auth.currentAuthenticatedUser({
       bypassCache: true,
@@ -23,10 +23,10 @@ export const syncUser = async () => {
         image: `https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/${Math.floor(
           Math.random() * 4 + 1
         )}.jpg`,
-        status: "Hey, I am using WhatsApp",
+        status: "Hey, I am using Who Cares",
       };
       await API.graphql(graphqlOperation(createUser, { input: newUser }));
-      console.log("User created");
+      // console.log("User created");
     }
   } catch (e) {
     console.log(e);

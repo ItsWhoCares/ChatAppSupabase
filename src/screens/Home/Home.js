@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  RefreshControl,
+} from "react-native";
 import React, { useEffect } from "react";
 import { Auth, API, graphqlOperation } from "aws-amplify";
 import CustomText from "../../components/CustomText";
@@ -40,6 +47,7 @@ const Home = () => {
     });
     // console.log(sortedRooms.length);
     setChatRooms(sortedRooms);
+    console.log(chatRooms);
     setLoading(false);
   };
 
@@ -54,7 +62,11 @@ const Home = () => {
 
   if (chatRooms.length === 0) {
     return (
-      <View style={styles.emptyChats}>
+      <ScrollView
+        contentContainerStyle={styles.emptyChats}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={fetchChatRooms} />
+        }>
         <Text style={{ color: "white" }}>
           No chats yet 😅. Start a{" "}
           <Text
@@ -63,7 +75,7 @@ const Home = () => {
             new chat.
           </Text>
         </Text>
-      </View>
+      </ScrollView>
     );
   }
 

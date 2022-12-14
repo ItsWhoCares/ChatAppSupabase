@@ -14,6 +14,7 @@ dayjs.extend(relativeTime);
 const SearchListItem = ({ user }) => {
   const navigation = useNavigation();
   const [authUser, setAuthUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -25,18 +26,22 @@ const SearchListItem = ({ user }) => {
 
   const onPress = async () => {
     //Check if the user is already in the chat room
+    if (loading) return;
+    setLoading(true);
     const existingChatRoom = await getCommonChatRoom(user.id);
-    // console.log(existingChatRoom);
     if (existingChatRoom) {
-      console.log("existing");
+      // console.log("existing");
+      // console.log(existingChatRoom.chatRoom.id);
+
       navigation.navigate("ChatRoom", {
-        id: existingChatRoom.id,
+        id: existingChatRoom.chatRoom.id,
         user: {
           id: user.id,
           name: user.name,
           image: user.image,
         },
       });
+      setLoading(false);
       return;
     }
     //If not, create a new chat room
@@ -52,7 +57,7 @@ const SearchListItem = ({ user }) => {
     }
 
     const newChatRoom = newChatRoomData.data?.createChatRoom;
-    console.log(newChatRoom);
+    console.log("new chat room", newChatRoom);
     //Add the user to the chat room
     await API.graphql(
       graphqlOperation(createUserChatRoom, {
@@ -74,6 +79,7 @@ const SearchListItem = ({ user }) => {
       })
     );
     console.log("new");
+    setLoading(false);
     // Navigate to the chat room
     navigation.navigate("ChatRoom", {
       id: newChatRoom.id,

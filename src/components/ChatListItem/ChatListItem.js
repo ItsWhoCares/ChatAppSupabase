@@ -61,6 +61,9 @@ const ChatListItem = ({ chat, onPress }) => {
   //   console.log(chat);
 
   //check for not Auth user
+  if (!chatRoom.LastMessage) {
+    return null;
+  }
 
   return (
     <Pressable

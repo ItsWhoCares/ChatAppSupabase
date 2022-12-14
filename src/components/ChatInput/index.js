@@ -9,6 +9,7 @@ const ChatInput = ({ chatRoom }) => {
   const [message, setMessage] = useState("");
 
   const handleSend = async () => {
+    if (message === "") return;
     // send the message to the chat server
     console.warn(`Sending: ${message}`);
 
