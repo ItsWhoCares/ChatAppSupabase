@@ -15,6 +15,15 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import { Auth } from "aws-amplify";
 
+//firebase
+import { auth } from "../../../firebase";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+  signOut,
+} from "firebase/auth";
+
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
 const onPrivacyPressed = () => {
@@ -39,16 +48,37 @@ const SignUp = () => {
     email.trim();
     password.trim();
     try {
-      const response = await Auth.signUp({
-        username: email,
-        email,
-        password,
-        attributes: {
-          name,
-        },
-      });
+      // const response = await Auth.signUp({
+      //   username: email,
+      //   email,
+      //   password,
+      //   attributes: {
+      //     name,
+      //   },
+      // });
+      // console.log(userData);
 
-      navigation.navigate("ConfirmEmail", { email });
+      //firebase
+      const userData = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(userData.user, {
+        displayName: name,
+        photoURL: `https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/${Math.floor(
+          Math.random() * 4 + 1
+        )}.jpg`,
+      });
+      const response = await sendEmailVerification(userData.user);
+      // console.log(response);
+
+      Alert.alert(
+        "Success",
+        "Please check your email to confirm your account."
+      );
+      signOut(auth);
+      navigation.navigate("SignIn", { email });
     } catch (error) {
       Alert.alert("Oops", error.message);
     } finally {
@@ -66,7 +96,9 @@ const SignUp = () => {
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={{ backgroundColor: myColors.pbgc }}
+      showsVerticalScrollIndicator={false}>
       <View style={styles.root}>
         <Text style={styles.title}>Create an account</Text>
         <View style={styles.container}>

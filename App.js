@@ -1,53 +1,27 @@
-// import { StatusBar } from "expo-status-bar";
+
 import {
   StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-  Image,
+
   SafeAreaView,
-  TouchableNativeFeedback,
-  Button,
-  Platform,
+
   StatusBar,
-  TextInput,
-  ScrollView,
+
+  LogBox,
 } from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
-import SignIn from "./src/screens/SignIn/SignIn";
-import SignUp from "./src/screens/SignUp/SignUp";
-import Input from "react-native-input-style";
-import ConfirmEmail from "./src/screens/ConfirmEmail";
+import React from "react";
 import Navigation from "./src/components/Navigation";
 import { myColors } from "./colors";
 
-import { useFonts } from "expo-font";
-import { Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
 
 import * as NavigationBar from "expo-navigation-bar";
 
-import { Amplify, Auth, graphqlOperation, API } from "aws-amplify";
-import { getUser } from "./src/graphql/queries";
-import { createUser, deleteUser } from "./src/graphql/mutations";
-
-import { syncUser } from "./dbhelper";
-
-import awsconfig from "./src/aws-exports";
-
-Amplify.configure(awsconfig);
 
 const App = () => {
   // Auth.signOut();
-
-  // const [fontsLoaded] = useFonts({
-  //   rr: Rubik_800ExtraBold,
-  // });
-
-  // if (!fontsLoaded) {
-  //   return null;
-  // }
-  useEffect(() => {
-    syncUser();
+  React.useEffect(() => {
+    LogBox.ignoreLogs([
+      "AsyncStorage has been extracted from react-native core and will be removed in a future release. It can now be installed and imported from '@react-native-async-storage/async-storage' instead of 'react-native'. See https://github.com/react-native-async-storage/async-storage",
+    ]);
   }, []);
   NavigationBar.setBackgroundColorAsync("black");
   return (

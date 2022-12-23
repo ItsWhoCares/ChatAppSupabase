@@ -3,13 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { API, graphqlOperation, Auth } from "aws-amplify";
-import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
-import { getCommonChatRoom } from "../../../dbhelper";
+import { createUserChatRoom } from "../../graphql/mutations";
+// import { getCommonChatRoom } from "../../../dbhelper";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { myColors } from "../../../colors";
 dayjs.extend(relativeTime);
+
+import { auth } from "../../../firebase";
+import { createChatRoom, getCommonChatRoom } from "../../../supabaseQueries";
 
 const SearchListItem = ({ user }) => {
   const navigation = useNavigation();
@@ -18,8 +21,9 @@ const SearchListItem = ({ user }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const userInfo = await Auth.currentAuthenticatedUser();
-      setAuthUser(userInfo?.attributes?.sub);
+      const userInfo = auth.currentUser;
+      // console.log(userInfo);
+      setAuthUser(userInfo);
     };
     fetchUser();
   }, []);
@@ -28,69 +32,39 @@ const SearchListItem = ({ user }) => {
     //Check if the user is already in the chat room
     if (loading) return;
     setLoading(true);
-    const existingChatRoom = await getCommonChatRoom(user.id);
-    if (existingChatRoom) {
-      // console.log("existing");
-      // console.log(existingChatRoom.chatRoom.id);
 
+    const commonChatRoom = await getCommonChatRoom({
+      authUserID: auth.currentUser.uid,
+      otherUserID: user.id,
+    });
+    console.log("other user", user.id, "auth user", auth.currentUser.uid);
+    console.log("here", commonChatRoom);
+    if (commonChatRoom) {
       navigation.navigate("ChatRoom", {
-        id: existingChatRoom.chatRoom.id,
+        id: commonChatRoom.id,
         user: {
           id: user.id,
           name: user.name,
           image: user.image,
         },
       });
-      setLoading(false);
-      return;
-    }
-    //If not, create a new chat room
-    const newChatRoomData = await API.graphql(
-      graphqlOperation(createChatRoom, { input: {} })
-    );
-
-    // console.log(newChatRoomData);
-
-    if (!newChatRoomData.data?.createChatRoom) {
-      console.log("Failed to create a chat room");
       return;
     }
 
-    const newChatRoom = newChatRoomData.data?.createChatRoom;
-    console.log("new chat room", newChatRoom);
-    //Add the user to the chat room
-    await API.graphql(
-      graphqlOperation(createUserChatRoom, {
-        input: {
-          chatRoomId: newChatRoom.id,
-          userId: user.id,
-        },
-      })
-    );
-
-    //Add the authenticated user to the chat room
-    const userInfo = await Auth.currentAuthenticatedUser();
-    await API.graphql(
-      graphqlOperation(createUserChatRoom, {
-        input: {
-          chatRoomId: newChatRoom.id,
-          userId: userInfo.attributes.sub,
-        },
-      })
-    );
-    console.log("new");
-    setLoading(false);
-    // Navigate to the chat room
+    // if not create a new chat room
+    const newChatRoomData = await createChatRoom(auth.currentUser.uid, user.id);
+    console.log(newChatRoomData);
     navigation.navigate("ChatRoom", {
-      id: newChatRoom.id,
+      id: newChatRoomData.id,
       user: {
         id: user.id,
         name: user.name,
         image: user.image,
       },
     });
+    setLoading(false);
   };
-  if (authUser == user.id) {
+  if (authUser?.uid == user.id) {
     return null;
   }
 

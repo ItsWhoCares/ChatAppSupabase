@@ -15,10 +15,17 @@ import messages from "../../../src/data/messages";
 import { myColors } from "../../../colors";
 import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../../components/CustomHeader";
-import { Auth, API, graphqlOperation } from "aws-amplify";
-import { getChatRoom, listMessagesByChatRoom } from "../../graphql/queries";
+// import { Auth, API, graphqlOperation } from "aws-amplify";
+// import { getChatRoom, listMessagesByChatRoom } from "../../graphql/queries";
 import { onCreateMessage } from "../../graphql/subscriptions";
 import { set } from "react-hook-form";
+
+import { auth } from "../../../firebase";
+import { supabase } from "../../initSupabase";
+import {
+  getChatRoomByID,
+  listMessagesByChatRoom,
+} from "../../../supabaseQueries";
 
 const ChatRoom = () => {
   const route = useRoute();
@@ -26,17 +33,19 @@ const ChatRoom = () => {
   const [chatRoom, setChatRoom] = useState(null);
   const [authUser, setAuthUser] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    Auth.currentAuthenticatedUser().then((user) => setAuthUser(user));
+    setAuthUser(auth.currentUser);
+    // Auth.currentAuthenticatedUser().then((user) => setAuthUser(user));
     // console.log(authUser?.attributes?.sub);
   }, [chatRoom]);
 
-  const user = route.params?.user;
+  const otherUser = route.params?.user;
   const chatRoomId = route.params?.id;
 
   useEffect(() => {
     navigation.setOptions({
-      title: user.name,
+      title: otherUser.name,
       headerTitleAlign: "left",
       headerTitleStyle: {
         color: "white",
@@ -46,52 +55,91 @@ const ChatRoom = () => {
         // marginLeft: 10,
       },
       // headerBackImageSource: user.image,
-      headerLeft: () => <CustomHeader image={user?.image} />,
+      headerLeft: () => <CustomHeader image={otherUser?.image} />,
     });
-  }, [user.name]);
+  }, [otherUser.name]);
   // const msg = messages.filter((m) => m.chatId === id);
 
   //chat room info
   useEffect(() => {
-    API.graphql(graphqlOperation(getChatRoom, { id: chatRoomId })).then(
-      (result) => setChatRoom(result.data?.getChatRoom)
-    );
+    getChatRoomByID(chatRoomId).then((result) => setChatRoom(result));
+    // console.log(chatRoom);
+
+    // API.graphql(graphqlOperation(getChatRoom, { id: chatRoomId })).then(
+    //   (result) => setChatRoom(result.data?.getChatRoom)
+    // );
   }, [chatRoomId]);
 
   //fetch messages
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const messagesData = await listMessagesByChatRoom(chatRoomId);
+      setMessages(messagesData);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const messagesData = await API.graphql(
-          graphqlOperation(listMessagesByChatRoom, {
-            chatroomID: chatRoomId,
-            sortDirection: "DESC",
-          })
-        );
-        setMessages(messagesData.data.listMessagesByChatRoom?.items);
-      } catch (e) {
-        console.log(e);
-      }
-    };
     fetchMessages();
-
     //subscribe to new messages
-    const subscription = API.graphql(
-      graphqlOperation(onCreateMessage, {
-        filter: { chatroomID: { eq: chatRoomId } },
-      })
-    ).subscribe({
-      next: ({ value }) => {
-        setMessages((prevMessages) => [
-          value.data.onCreateMessage,
-          ...prevMessages,
-        ]);
-      },
-      error: (error) => console.log(error),
-    });
+    const subscription = supabase
+      .channel("public:Message:ChatRoomID=eq." + chatRoomId + "")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "Message",
+          filter: `ChatRoomID=eq.${chatRoomId}`,
+        },
+        (payload) => {
+          console.log("Message payload", payload);
+          setMessages((prevMessages) => [payload.new, ...prevMessages]);
+        }
+      )
+      .subscribe();
 
-    return () => subscription.unsubscribe();
+    // console.log(subscription);
+
+    return () => supabase.removeChannel(subscription);
   }, [chatRoomId]);
+
+  // useEffect(() => {
+  //   const fetchMessages = async () => {
+  //     try {
+  //       const messagesData = await API.graphql(
+  //         graphqlOperation(listMessagesByChatRoom, {
+  //           chatroomID: chatRoomId,
+  //           sortDirection: "DESC",
+  //         })
+  //       );
+  //       setMessages(messagesData.data.listMessagesByChatRoom?.items);
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   };
+  //   fetchMessages();
+
+  //   //subscribe to new messages
+  //   const subscription = API.graphql(
+  //     graphqlOperation(onCreateMessage, {
+  //       filter: { chatroomID: { eq: chatRoomId } },
+  //     })
+  //   ).subscribe({
+  //     next: ({ value }) => {
+  //       setMessages((prevMessages) => [
+  //         value.data.onCreateMessage,
+  //         ...prevMessages,
+  //       ]);
+  //     },
+  //     error: (error) => console.log(error),
+  //   });
+
+  //   return () => subscription.unsubscribe();
+  // }, [chatRoomId]);
 
   // console.log(chatRoom);
 
@@ -107,10 +155,12 @@ const ChatRoom = () => {
       <FlatList
         data={messages}
         renderItem={({ item }) => (
-          <Message message={item} authUser={authUser.attributes?.sub} />
+          <Message message={item} authUser={authUser.uid} />
         )}
         style={styles.list}
         inverted
+        onRefresh={fetchMessages}
+        refreshing={loading}
       />
       <View style={{ paddingTop: 10 }}>
         <ChatInput chatRoom={chatRoom} />

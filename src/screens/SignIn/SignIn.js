@@ -20,6 +20,12 @@ import { myColors } from "../../../colors";
 
 import { useFonts, Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
 import { syncUser } from "../../../dbhelper";
+
+import { auth } from "../../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+import { addUser } from "../../../supabaseQueries";
+
 const SignIn = () => {
   const route = useRoute();
   // const [fontsLoaded] = useFonts({
@@ -41,9 +47,27 @@ const SignIn = () => {
     if (loading) return;
     setLoading(true);
     try {
-      const response = await Auth.signIn(data.email.trim(), data.password);
-      syncUser();
-      await navigation.navigate("Home");
+      // const response = await Auth.signIn(data.email.trim(), data.password);
+      // syncUser();
+
+      //firebase
+      const response = await signInWithEmailAndPassword(
+        auth,
+        data.email.trim(),
+        data.password
+      );
+      if (!response.user.emailVerified) {
+        Alert.alert("Please verify your email");
+        return;
+      }
+
+      const res = await addUser(response.user.uid, response.user.displayName);
+      if (!res) {
+        Alert.alert("Oops", "Something went wrong");
+        return;
+      }
+
+      navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Oops", error.message);
     } finally {

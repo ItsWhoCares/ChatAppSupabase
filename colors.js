@@ -6,6 +6,7 @@ module.exports.myColors = {
   SecondaryMessage: "#303134",
   inputBox: "#303134",
   inputBoxText: "white",
+  inputBoxInsideText: "#707271",
   primaryBtn: "#0095F6",
   primaryBtnPressed: "#4CB5F9",
   primaryBtnText: "white",
@@ -14,6 +15,7 @@ module.exports.myColors = {
   secondaryBtnPressed: "#303134",
   secondaryBtnText: "#0095F6",
   secondaryBtnTextPressed: "#0095F6",
+  containerPressed: "#1e1e1e",
 };
 
 // module.exports.myColors = {

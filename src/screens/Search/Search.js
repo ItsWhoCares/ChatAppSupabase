@@ -7,7 +7,10 @@ import { AntDesign } from "@expo/vector-icons";
 import ChatInput from "../../components/ChatInput";
 
 import { API, graphqlOperation } from "aws-amplify";
-import { searchUsers, listUsers } from "../../graphql/queries";
+// import { searchUsers, listUsers } from "../../graphql/queries";
+
+import { listUsers } from "../../../supabaseQueries";
+
 const Search = () => {
   const navigation = useNavigation();
   const [SearchText, setSearchText] = React.useState("");
@@ -51,9 +54,11 @@ const Search = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      API.graphql(graphqlOperation(listUsers)).then((res) => {
-        setUsers(res.data.listUsers.items);
-      });
+      const users = await listUsers();
+      setUsers(users);
+      // API.graphql(graphqlOperation(listUsers)).then((res) => {
+      //   setUsers(res.data.listUsers.items);
+      // });
       // console.log(users);
     } catch (e) {
       console.log(e);

@@ -8,7 +8,7 @@ dayjs.extend(relativeTime);
 const Message = ({ message, authUser }) => {
   // console.log(authUser);
   const isMyMessage = () => {
-    return message?.userID === authUser;
+    return message?.UserID === authUser;
   };
   return (
     <View

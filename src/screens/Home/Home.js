@@ -7,7 +7,6 @@ import {
   RefreshControl,
 } from "react-native";
 import React, { useEffect } from "react";
-import { Auth, API, graphqlOperation } from "aws-amplify";
 import CustomText from "../../components/CustomText";
 import ChatListItem from "../../components/ChatListItem";
 import { myColors } from "../../../colors";
@@ -17,10 +16,17 @@ import { AntDesign } from "@expo/vector-icons";
 import HomeHeader from "../../components/HomeHeader";
 import { listMyChatRooms } from "../../../dbhelper";
 import { onUpdateChatRoom } from "../../graphql/subscriptions";
+
+import { auth } from "../../../firebase";
+
+import { listUserChatRooms } from "../../../supabaseQueries";
+import { supabase } from "../../initSupabase";
+
 const Home = () => {
   const navigation = useNavigation();
   const [chatRooms, setChatRooms] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [rerender, setRerender] = React.useState(false);
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -36,20 +42,59 @@ const Home = () => {
   }, []);
 
   const fetchChatRooms = async () => {
+    setRerender(!rerender);
     setLoading(true);
-    const userInfo = await Auth.currentAuthenticatedUser();
-    const res = await API.graphql(
-      graphqlOperation(listMyChatRooms, { id: userInfo.attributes.sub })
-    );
-    const rooms = res?.data?.getUser?.ChatRooms?.items || [];
-    const sortedRooms = rooms.sort((a, b) => {
-      return new Date(b.chatRoom.updatedAt) - new Date(a.chatRoom.updatedAt);
+
+    const chatRooms = await listUserChatRooms(auth.currentUser.uid);
+    // console.log(chatRooms);
+
+    //sort by last message created_at
+    const sortedRooms = chatRooms.sort((a, b) => {
+      // console.log(a);
+      return (
+        new Date(b.ChatRoom.LastMessage.created_at) -
+        new Date(a.ChatRoom.LastMessage.created_at)
+      );
     });
-    // console.log(sortedRooms.length);
-    setChatRooms(sortedRooms);
-    console.log(chatRooms);
+
+    // console.log(JSON.stringify(sortedRooms, null, "\t"));
+    setChatRooms([]);
+    setChatRooms([...sortedRooms]);
+    // const userInfo = await Auth.currentAuthenticatedUser();
+    // const res = await API.graphql(
+    //   graphqlOperation(listMyChatRooms, { id: userInfo.attributes.sub })
+    // );
+    // const rooms = res?.data?.getUser?.ChatRooms?.items || [];
+    // const sortedRooms = rooms.sort((a, b) => {
+    //   return new Date(b.chatRoom.updatedAt) - new Date(a.chatRoom.updatedAt);
+    // });
+    // // console.log(sortedRooms.length);
+    // setChatRooms(sortedRooms);
+    // console.log(chatRooms);
     setLoading(false);
   };
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel("public:UserChatRoom:UserID=eq." + auth.currentUser.uid)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "UserChatRoom",
+          filter: `UserID=eq.${auth.currentUser.uid}`,
+        },
+        (payload) => {
+          console.log("newChatRoom", payload);
+          fetchChatRooms();
+        }
+      );
+    return () => {
+      // console.log("left");
+      supabase.removeChannel(subscription);
+    };
+  }, [auth.currentUser.uid]);
 
   //fetch chatrooms
   useEffect(() => {
@@ -60,7 +105,13 @@ const Home = () => {
     navigation.navigate("Search");
   };
 
-  if (chatRooms.length === 0) {
+  // console.log(chatRooms);
+
+  if (
+    chatRooms?.length === 1 &&
+    chatRooms[0]?.ChatRoom?.LastMessageID ===
+      "b15f0db2-87f6-4358-874a-4297ee170240"
+  ) {
     return (
       <ScrollView
         contentContainerStyle={styles.emptyChats}
@@ -85,7 +136,8 @@ const Home = () => {
     <View style={styles.root}>
       <FlatList
         data={chatRooms}
-        renderItem={({ item }) => <ChatListItem chat={item.chatRoom} />}
+        extraData={rerender}
+        renderItem={({ item }) => <ChatListItem chat={item} />}
         onRefresh={fetchChatRooms}
         refreshing={loading}
       />
@@ -99,7 +151,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: myColors.pbgc,
-    paddingVertical: 10,
+    paddingVertical: 5,
 
     justifyContent: "center",
     // alignItems: "center",

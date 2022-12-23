@@ -15,6 +15,9 @@ import { useForm } from "react-hook-form";
 import { useRoute } from "@react-navigation/native";
 import { Auth } from "aws-amplify";
 
+import { auth } from "../../../firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
+
 const ResetPassword = () => {
   const route = useRoute();
   const { control, handleSubmit, watch } = useForm();
@@ -24,8 +27,13 @@ const ResetPassword = () => {
 
   const onSendPressed = async (data) => {
     try {
-      const response = await Auth.forgotPassword(data.email);
-      navigation.navigate("NewPassword", { email: data.email });
+      //aws
+      // const response = await Auth.forgotPassword(data.email);
+
+      //firebase
+      await sendPasswordResetEmail(auth, data.email);
+      Alert.alert("Link sent", "Check your email to reset your password");
+      navigation.navigate("SignIn", { email: data.email });
     } catch (error) {
       Alert.alert("Oops", error.message);
     }

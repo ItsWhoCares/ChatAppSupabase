@@ -16,30 +16,35 @@ import { myColors } from "../../../colors";
 import Settings from "../../screens/Settings";
 import Search from "../../screens/Search";
 
+import { auth } from "../../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+
 const Navigation = () => {
   const [user, setUser] = useState(undefined);
   const checkUser = async () => {
-    try {
-      const user = await Auth.currentAuthenticatedUser({ bypassCache: true });
-      setUser(user);
-    } catch (error) {
-      setUser(null);
-      console.log(error);
-    }
+    onAuthStateChanged(auth, (u) => {
+      if (u && u.emailVerified) {
+        setUser(true);
+        // getUserData();
+      } else {
+        setUser(false);
+        // setUserData(null);
+      }
+    });
   };
   useEffect(() => {
     checkUser();
   }, []);
-  useEffect(() => {
-    const listener = Hub.listen("auth", (data) => {
-      if (data.payload.event === "signIn" || data.payload.event === "signOut") {
-        checkUser();
-      }
-    });
-    return () => {
-      listener();
-    };
-  }, []);
+  // useEffect(() => {
+  //   const listener = Hub.listen("auth", (data) => {
+  //     if (data.payload.event === "signIn" || data.payload.event === "signOut") {
+  //       checkUser();
+  //     }
+  //   });
+  //   return () => {
+  //     listener();
+  //   };
+  // }, []);
   if (user === undefined)
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

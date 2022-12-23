@@ -8,39 +8,81 @@ import { Auth, API, graphqlOperation } from "aws-amplify";
 import { onUpdateChatRoom } from "../../graphql/subscriptions";
 dayjs.extend(relativeTime);
 
+import { auth } from "../../../firebase";
+import { supabase } from "../../initSupabase";
+import { getMessageByID } from "../../initSupabase";
+
 const ChatListItem = ({ chat, onPress }) => {
   const navigation = useNavigation();
-  const [user, setUser] = useState(null);
+  const [otherUser, setOtherUser] = useState(chat.User);
   const [chatRoom, setChatRoom] = useState(chat);
+  // console.log(console.log("hehe", JSON.stringify(chat, null, "\t")));
   useEffect(() => {
     const fetchUser = async () => {
       // console.log("yeyeyeye");
-      const authUser = await Auth.currentAuthenticatedUser();
-      const userItem = chatRoom.users.items.find(
-        (item) => item?.user.id !== authUser.attributes.sub
-      );
-      setUser(userItem?.user);
+      // const authUser = auth.currentUser;
+      // const userItem = chatRoom.users.find((item) => item?.id !== authUser.uid);
+      // setUser(userItem?.users);
+      // console.log(userItem);
     };
     fetchUser();
 
+    // console.log(chat.ChatRoom.id);
     // Subscribe to onUpdateChatRoom
-    const subscription = API.graphql(
-      graphqlOperation(onUpdateChatRoom, {
-        filter: { id: { eq: chat.id } },
-      })
-    ).subscribe({
-      next: ({ value }) => {
-        setChatRoom((cr) => ({
-          ...(cr || {}),
-          ...value.data.onUpdateChatRoom,
-        }));
-      },
-      error: (error) => console.warn(error),
-    });
+    const subscription = supabase
+      .channel("public:ChatRoom:id=eq." + chat.ChatRoom.id + "")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "ChatRoom",
+          filter: `id=eq.${chat.ChatRoom.id}`,
+        },
+        async (payload) => {
+          // console.log(
+          //   "Before",
+          //   auth.currentUser.uid,
+          //   JSON.stringify(chatRoom, null, "\t")
+          // );
+          //Update the chat room last message
 
-    // Stop receiving data updates from the subscription
-    return () => subscription.unsubscribe();
-  }, [chat.id]);
+          if (payload.new.id === chatRoom.ChatRoom.id) {
+            const newChatRoom = { ...chatRoom } || {};
+            newChatRoom.ChatRoom.LastMessageID = payload.new.LastMessageID;
+            const res = await getMessageByID(payload.new.LastMessageID);
+            newChatRoom.ChatRoom.LastMessage = res;
+            setChatRoom(newChatRoom);
+          }
+
+          // console.log(
+          //   "After",
+          //   auth.currentUser.uid,
+          //   JSON.stringify(chatRoom, null, "\t")
+          // );
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(subscription);
+
+    // const subscription = API.graphql(
+    //   graphqlOperation(onUpdateChatRoom, {
+    //     filter: { id: { eq: chat.id } },
+    //   })
+    // ).subscribe({
+    //   next: ({ value }) => {
+    //     setChatRoom((cr) => ({
+    //       ...(cr || {}),
+    //       ...value.data.onUpdateChatRoom,
+    //     }));
+    //   },
+    //   error: (error) => console.warn(error),
+    // });
+
+    // // Stop receiving data updates from the subscription
+    // return () => subscription.unsubscribe();
+  }, [chat.ChatRoom.id]);
 
   // useEffect(() => {
   //   const subscription = API.graphql(graphqlOperation(onUpdateChatRoom), {
@@ -60,38 +102,41 @@ const ChatListItem = ({ chat, onPress }) => {
   // const chat = props.chat;
   //   console.log(chat);
 
+  // console.log("\n\n\n\n\nhere\n\n\n\n", chatRoom, "\n\n\n\n\n\n");
   //check for not Auth user
-  if (!chatRoom.LastMessage) {
+  if (chatRoom?.ChatRoom?.LastMessage.text == "Send first message") {
     return null;
   }
 
   return (
     <Pressable
-      style={styles.container}
+      style={({ pressed }) =>
+        pressed ? [styles.containerPressed] : styles.container
+      }
       onPress={() =>
         navigation.navigate("ChatRoom", {
-          id: chatRoom.id,
+          id: chatRoom?.ChatRoom?.id,
           user: {
-            id: user.id,
-            name: user.name,
-            image: user.image,
+            id: otherUser.id,
+            name: otherUser.name,
+            image: otherUser.image,
           },
         })
       }>
-      <Image style={styles.image} source={{ uri: user?.image }} />
+      <Image style={styles.image} source={{ uri: otherUser?.image }} />
       <View style={styles.content}>
         <View style={styles.row}>
           <Text numberOfLines={1} style={styles.name}>
-            {user?.name}
+            {otherUser?.name}
           </Text>
-          {chatRoom.LastMessage && (
-            <Text numberOfLines={2} style={styles.subTitle}>
-              {dayjs(chatRoom.LastMessage?.createdAt).fromNow(true)}
+          {chatRoom?.ChatRoom.LastMessage && (
+            <Text numberOfLines={2} style={styles.time}>
+              {dayjs(chatRoom?.ChatRoom?.LastMessage?.created_at).fromNow(true)}
             </Text>
           )}
         </View>
 
-        <Text style={styles.subTitle}>{chatRoom.LastMessage?.text}</Text>
+        <Text style={styles.text}>{chatRoom?.ChatRoom.LastMessage?.text}</Text>
       </View>
     </Pressable>
   );
@@ -102,7 +147,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 10,
     marginVertical: 5,
-    height: 70,
+    height: 80,
+
+    // backgroundColor: myColors.containerPressed,
+    borderRadius: 10,
+    padding: 5,
+  },
+  containerPressed: {
+    backgroundColor: myColors.containerPressed,
+    flexDirection: "row",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 10,
+    height: 80,
+    padding: 5,
   },
   content: {
     flex: 1,
@@ -114,6 +172,8 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     marginRight: 10,
+
+    marginTop: 5,
   },
   row: {
     flexDirection: "row",
@@ -125,7 +185,11 @@ const styles = StyleSheet.create({
     color: "white",
     flex: 1,
   },
-  subTitle: {
+  time: {
+    color: myColors.secondaryText,
+    paddingHorizontal: 5,
+  },
+  text: {
     color: myColors.secondaryText,
   },
 });

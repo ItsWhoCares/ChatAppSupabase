@@ -37,6 +37,7 @@ const CustomInput = ({
               onChangeText={onChange}
               value={value}
               placeholder={placeholder}
+              placeholderTextColor={myColors.inputBoxInsideText}
               secureTextEntry={secure}
             />
           </View>

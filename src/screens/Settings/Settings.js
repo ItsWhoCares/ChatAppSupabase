@@ -1,5 +1,13 @@
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+  TextInput,
+  FlatList,
+} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { myColors } from "../../../colors";
@@ -9,20 +17,41 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Auth, graphqlOperation, API } from "aws-amplify";
 import { getUser } from "../../graphql/queries";
 
+import { auth } from "../../../firebase";
+import { signOut } from "firebase/auth";
+
+import { supabase } from "../../initSupabase";
+
+import { getUserByID } from "../../../supabaseQueries";
+
 const Settings = () => {
   const [user, setUser] = useState(null);
+  const [name, setName] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [image, setImage] = useState(null);
+  const [selecting, setSelecting] = useState(false);
+
   const navigation = useNavigation();
+  const [editable, setEditable] = useState(false);
+  const refInputName = useRef(null);
   const onSignOutPressed = () => {
-    Auth.signOut();
+    // Auth.signOut();
+    signOut(auth);
   };
 
   const fetchUser = async () => {
-    const userInfo = await Auth.currentAuthenticatedUser();
-    const userData = await API.graphql(
-      graphqlOperation(getUser, { id: userInfo.attributes.sub })
-    );
+    const userInfo = auth.currentUser;
+    const userData = await getUserByID(userInfo.uid);
+
+    // const userInfo = await Auth.currentAuthenticatedUser();
+    // const userData = await API.graphql(
+    //   graphqlOperation(getUser, { id: userInfo.attributes.sub })
+    // );
     // console.log(userData.data.getUser);
-    setUser(userData.data.getUser);
+    setUser(userData);
+    setName(userData.name);
+    setImage(userData.image);
+    setStatus(userData.status);
   };
   useEffect(() => {
     fetchUser();
@@ -36,15 +65,114 @@ const Settings = () => {
         backgroundColor: myColors.pbgc,
         color: "white",
       },
+      headerBackTitle: "Back",
+      headerRight: () => (
+        <>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 20,
+              fontWeight: "bold",
+            }}
+            onPress={onSignOutPressed}>
+            Sign Out
+          </Text>
+        </>
+      ),
     });
   }, []);
 
+  const handelImageChange = async (item) => {
+    console.log("image changed");
+    // refInputName.current?.blur();
+    const { data, error } = await supabase
+      .from("User")
+      .update({
+        image: `https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/${item}.jpg`,
+      })
+      .eq("id", user.id)
+      .select();
+
+    console.log(data, error);
+    fetchUser();
+  };
+
+  const handelStatusChange = async () => {
+    // console.log("status changed", status);
+    // refInputName.current?.blur();
+    await supabase.from("User").update({ status: status }).eq("id", user.id);
+    fetchUser();
+  };
+
+  const handelNameChange = async () => {
+    // console.log("name changed", name);
+    // refInputName.current?.blur();
+    await supabase.from("User").update({ name: name }).eq("id", user.id);
+    fetchUser();
+  };
+
   return (
     <View style={styles.root}>
-      <Pressable style={styles.imageContainer}>
-        <Image source={{ uri: user?.image }} style={styles.image} />
-      </Pressable>
-      <Pressable style={styles.container}>
+      {selecting ? (
+        <View
+          style={{
+            marginTop: 10,
+            height: "50%",
+            marginBottom: 10,
+            // backgroundColor: "white",
+            // width: "100%",
+          }}>
+          <FlatList
+            // horizontal={true}
+            // style={{ width: "100%", height: 100 }}
+            data={["1", "2", "3", "4"]}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => {
+                  setSelecting(false);
+                  setImage(
+                    `https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/${item}.jpg`
+                  );
+                  handelImageChange(item);
+                }}
+                style={{
+                  // backgroundColor: "red",
+                  padding: 10,
+                  // justifyContent: "center",
+                  // alignItems: "center",
+                  height: "80%",
+                  // marginVertical: 10,
+                }}>
+                <Image
+                  source={{
+                    uri: `https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/${item}.jpg`,
+                  }}
+                  style={{
+                    borderRadius: 100,
+                    width: 150,
+                    height: 150,
+                  }}
+                  // resizeMode="cover"
+                />
+              </Pressable>
+            )}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-around" }}
+          />
+        </View>
+      ) : (
+        <Pressable
+          style={styles.imageContainer}
+          onPress={() => setSelecting(true)}>
+          <Image source={{ uri: image }} style={styles.image} />
+        </Pressable>
+      )}
+
+      <Pressable
+        style={({ pressed }) =>
+          pressed ? styles.containerPressed : styles.container
+        }
+        onPress={() => refInputName.current?.focus()}>
         <FontAwesome
           style={styles.icon1}
           name="user"
@@ -53,7 +181,15 @@ const Settings = () => {
         />
         <View style={styles.content}>
           <Text style={styles.title}>Name</Text>
-          <Text style={styles.subTitle}>{user?.name}</Text>
+          <TextInput
+            style={styles.subTitle}
+            ref={refInputName}
+            
+            maxLength={20}
+            onChangeText={(text) => setName(text)}
+            onSubmitEditing={handelNameChange}
+            value={name}
+          />
           <Text
             style={{
               color: myColors.secondaryText,
@@ -71,7 +207,10 @@ const Settings = () => {
           color={myColors.secondaryText}
         />
       </Pressable>
-      <Pressable style={styles.container}>
+      <Pressable
+        style={({ pressed }) =>
+          pressed ? styles.containerPressed : styles.container
+        }>
         <Feather
           style={styles.icon1}
           name="info"
@@ -80,7 +219,13 @@ const Settings = () => {
         />
         <View style={styles.content}>
           <Text style={styles.title}>About</Text>
-          <Text style={styles.subTitle}>{user?.status}</Text>
+          <TextInput
+            style={styles.subTitle}
+            maxLength={30}
+            onChangeText={(text) => setStatus(text)}
+            onSubmitEditing={handelStatusChange}
+            value={status}
+          />
         </View>
         <FontAwesome5
           style={styles.icon2}
@@ -89,20 +234,6 @@ const Settings = () => {
           color={myColors.secondaryText}
         />
       </Pressable>
-
-      <Text
-        style={{
-          color: "white",
-          fontSize: 20,
-          fontWeight: "bold",
-          textAlign: "center",
-          width: "100%",
-          marginTop: "auto",
-          marginVertical: 20,
-        }}
-        onPress={onSignOutPressed}>
-        Sign Out
-      </Text>
     </View>
   );
 };
@@ -124,11 +255,23 @@ const styles = StyleSheet.create({
     height: "90%",
   },
   container: {
+    // backgroundColor: "#1e1e1e",
     flexDirection: "row",
     marginHorizontal: 10,
-    marginVertical: 10,
+    marginVertical: 5,
+    paddingVertical: 10,
     // marginBottom: 20,
     // height: 130,
+  },
+  containerPressed: {
+    flexDirection: "row",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    paddingVertical: 10,
+    // marginBottom: 20,
+    // height: 130,
+    backgroundColor: "#1e1e1e",
+    borderRadius: 10,
   },
   content: {
     flex: 1,
