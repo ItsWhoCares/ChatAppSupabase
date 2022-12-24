@@ -6,8 +6,6 @@ import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import ChatInput from "../../components/ChatInput";
 
-import { API, graphqlOperation } from "aws-amplify";
-// import { searchUsers, listUsers } from "../../graphql/queries";
 
 import { listUsers } from "../../../supabaseQueries";
 

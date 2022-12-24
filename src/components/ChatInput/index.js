@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { myColors } from "../../../colors";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { API, graphqlOperation, Auth } from "aws-amplify";
 // import { createMessage, updateChatRoom } from "../../graphql/mutations";
 
 import { auth } from "../../../firebase";

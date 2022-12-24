@@ -5,13 +5,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import SignIn from "../../screens/SignIn/SignIn";
 import SignUp from "../../screens/SignUp/SignUp";
-import Input from "react-native-input-style";
 import ConfirmEmail from "../../screens/ConfirmEmail";
 import Home from "../../screens/Home";
 import ResetPassword from "../../screens/ResetPassword";
 import NewPassword from "../../screens/NewPassword";
 import ChatRoom from "../../screens/ChatRoom";
-import { Auth, Hub } from "aws-amplify";
 import { myColors } from "../../../colors";
 import Settings from "../../screens/Settings";
 import Search from "../../screens/Search";

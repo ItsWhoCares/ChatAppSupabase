@@ -13,7 +13,6 @@ import { myColors } from "../../../colors";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
-import { Auth } from "aws-amplify";
 
 //firebase
 import { auth } from "../../../firebase";

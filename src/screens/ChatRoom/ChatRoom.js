@@ -15,11 +15,6 @@ import messages from "../../../src/data/messages";
 import { myColors } from "../../../colors";
 import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../../components/CustomHeader";
-// import { Auth, API, graphqlOperation } from "aws-amplify";
-// import { getChatRoom, listMessagesByChatRoom } from "../../graphql/queries";
-import { onCreateMessage } from "../../graphql/subscriptions";
-import { set } from "react-hook-form";
-
 import { auth } from "../../../firebase";
 import { supabase } from "../../initSupabase";
 import {

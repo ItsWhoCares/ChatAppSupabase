@@ -13,7 +13,6 @@ import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import { useRoute } from "@react-navigation/native";
-import { Auth } from "aws-amplify";
 
 const NewPassword = () => {
   const route = useRoute();
@@ -24,16 +23,16 @@ const NewPassword = () => {
   const navigation = useNavigation();
 
   const onSubmitPressed = async (data) => {
-    try {
-      const response = await Auth.forgotPasswordSubmit(
-        email,
-        data.code,
-        data.password
-      );
-      navigation.popToTop();
-    } catch (error) {
-      Alert.alert("Oops", error.message);
-    }
+    // try {
+    //   const response = await Auth.forgotPasswordSubmit(
+    //     email,
+    //     data.code,
+    //     data.password
+    //   );
+    //   navigation.popToTop();
+    // } catch (error) {
+    //   Alert.alert("Oops", error.message);
+    // }
   };
 
   //   const onResendPressed = async () => {

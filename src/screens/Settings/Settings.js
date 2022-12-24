@@ -14,9 +14,6 @@ import { myColors } from "../../../colors";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 
-import { Auth, graphqlOperation, API } from "aws-amplify";
-import { getUser } from "../../graphql/queries";
-
 import { auth } from "../../../firebase";
 import { signOut } from "firebase/auth";
 

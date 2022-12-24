@@ -1,20 +1,9 @@
-
-import {
-  StyleSheet,
-
-  SafeAreaView,
-
-  StatusBar,
-
-  LogBox,
-} from "react-native";
+import { StyleSheet, SafeAreaView, StatusBar, LogBox } from "react-native";
 import React from "react";
 import Navigation from "./src/components/Navigation";
 import { myColors } from "./colors";
 
-
 import * as NavigationBar from "expo-navigation-bar";
-
 
 const App = () => {
   // Auth.signOut();

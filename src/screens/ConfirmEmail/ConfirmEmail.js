@@ -13,7 +13,6 @@ import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import { useRoute } from "@react-navigation/native";
-import { Auth } from "aws-amplify";
 
 const ConfirmEmail = () => {
   const route = useRoute();

@@ -13,13 +13,9 @@ import CustomButton from "../../components/CustomButton";
 import SocialSignInButtons from "../../components/SocialSignInButtons";
 import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
-import { Amplify, Auth } from "aws-amplify";
 import { useRoute } from "@react-navigation/native";
 
 import { myColors } from "../../../colors";
-
-import { useFonts, Rubik_800ExtraBold } from "@expo-google-fonts/rubik";
-import { syncUser } from "../../../dbhelper";
 
 import { auth } from "../../../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";

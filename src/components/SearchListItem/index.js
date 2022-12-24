@@ -2,9 +2,6 @@ import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
-import { API, graphqlOperation, Auth } from "aws-amplify";
-import { createUserChatRoom } from "../../graphql/mutations";
-// import { getCommonChatRoom } from "../../../dbhelper";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
