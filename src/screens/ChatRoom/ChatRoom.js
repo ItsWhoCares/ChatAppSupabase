@@ -26,7 +26,7 @@ const ChatRoom = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [chatRoom, setChatRoom] = useState(null);
-  const [authUser, setAuthUser] = useState(null);
+  const [authUser, setAuthUser] = useState(auth.currentUser);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -35,22 +35,30 @@ const ChatRoom = () => {
     // console.log(authUser?.attributes?.sub);
   }, [chatRoom]);
 
+  const [otherUserOnline, setOtherUserOnline] = useState(false);
+
   const otherUser = route.params?.user;
   const chatRoomId = route.params?.id;
 
   useEffect(() => {
     navigation.setOptions({
-      title: otherUser.name,
-      headerTitleAlign: "left",
-      headerTitleStyle: {
-        color: "white",
-      },
+      title: null,
+      // headerTitleAlign: "left",
+      // headerTitleStyle: {
+      //   color: "white",
+      // },
       headerStyle: {
         backgroundColor: myColors.pbgc,
         // marginLeft: 10,
       },
       // headerBackImageSource: user.image,
-      headerLeft: () => <CustomHeader image={otherUser?.image} />,
+      headerLeft: () => (
+        <CustomHeader
+          image={otherUser?.image}
+          online={false}
+          oUser={otherUser}
+        />
+      ),
     });
   }, [otherUser.name]);
   // const msg = messages.filter((m) => m.chatId === id);
@@ -64,6 +72,17 @@ const ChatRoom = () => {
     //   (result) => setChatRoom(result.data?.getChatRoom)
     // );
   }, [chatRoomId]);
+
+  useEffect(() => {
+    // const interval = setInterval(() => {
+    //   console.log("Running task...");
+    // }, 5000);
+
+    return () => {
+      // clearInterval(interval);
+      console.log("Cleared interval");
+    };
+  }, []);
 
   //fetch messages
   const fetchMessages = async () => {
@@ -91,7 +110,7 @@ const ChatRoom = () => {
           filter: `ChatRoomID=eq.${chatRoomId}`,
         },
         (payload) => {
-          console.log("Message payload", payload);
+          // console.log("Message payload", payload);
           setMessages((prevMessages) => [payload.new, ...prevMessages]);
         }
       )
@@ -103,40 +122,48 @@ const ChatRoom = () => {
   }, [chatRoomId]);
 
   // useEffect(() => {
-  //   const fetchMessages = async () => {
-  //     try {
-  //       const messagesData = await API.graphql(
-  //         graphqlOperation(listMessagesByChatRoom, {
-  //           chatroomID: chatRoomId,
-  //           sortDirection: "DESC",
-  //         })
-  //       );
-  //       setMessages(messagesData.data.listMessagesByChatRoom?.items);
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   };
-  //   fetchMessages();
+  //   // Supabase client setup
 
-  //   //subscribe to new messages
-  //   const subscription = API.graphql(
-  //     graphqlOperation(onCreateMessage, {
-  //       filter: { chatroomID: { eq: chatRoomId } },
-  //     })
-  //   ).subscribe({
-  //     next: ({ value }) => {
-  //       setMessages((prevMessages) => [
-  //         value.data.onCreateMessage,
-  //         ...prevMessages,
-  //       ]);
+  //   const channel = supabase.channel("online-users", {
+  //     config: {
+  //       presence: {
+  //         key: authUser.uid,
+  //       },
   //     },
-  //     error: (error) => console.log(error),
   //   });
 
-  //   return () => subscription.unsubscribe();
-  // }, [chatRoomId]);
+  //   channel.on("presence", { event: "sync" }, async () => {
+  //     const onlineUsers = channel.presenceState();
+  //     // console.log("Online users: ", onlineUsers);
+  //     console.log("Online users: ", onlineUsers);
+  //     setOtherUserOnline(onlineUsers[otherUser.id] ? true : false);
+  //     console.log(onlineUsers[otherUser.id] ? true : false);
+  //   });
 
-  // console.log(chatRoom);
+  //   // channel.on("presence", { event: "join" }, ({ newPresences }) => {
+  //   //   console.log("New users have joined: ", newPresences);
+  //   // });
+
+  //   // channel.on("presence", { event: "leave" }, ({ leftPresences }) => {
+  //   //   console.log("Users have left: ", leftPresences);
+  //   // });
+  //   let inter;
+
+  //   channel.subscribe(async (status) => {
+  //     if (status === "SUBSCRIBED") {
+  //       inter = setInterval(async () => {
+  //         const status = await channel.track({
+  //           online_at: new Date().toISOString(),
+  //         });
+  //       }, 10000);
+  //     }
+  //   });
+  //   return () => {
+  //     clearInterval(inter);
+  //     supabase.removeChannel(channel);
+  //     console.log("channel removed");
+  //   };
+  // }, [chatRoomId]);
 
   if (!chatRoom) {
     return (
@@ -158,7 +185,7 @@ const ChatRoom = () => {
         refreshing={loading}
       />
       <View style={{ paddingTop: 10 }}>
-        <ChatInput chatRoom={chatRoom} />
+        <ChatInput chatRoom={chatRoom} otherUser={otherUser} />
       </View>
     </View>
   );

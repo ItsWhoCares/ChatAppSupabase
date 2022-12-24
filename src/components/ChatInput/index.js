@@ -11,8 +11,9 @@ import {
   getCommonChatRoom,
 } from "../../../supabaseQueries";
 
-const ChatInput = ({ chatRoom }) => {
+const ChatInput = ({ chatRoom, otherUser }) => {
   const [message, setMessage] = useState("");
+  // const [otherUser, setOtherUser] = useState(OtherUser);
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
@@ -66,6 +67,20 @@ const ChatInput = ({ chatRoom }) => {
     //   console.log(e);
     // }
     setLoading(false);
+    // console.log("otherUser", otherUser);
+    const nf = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // body: '{"to": "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]","title":"hello","body": "world"}',
+      body: JSON.stringify({
+        to: "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]",
+        title: otherUser.name,
+        body: message,
+      }),
+    });
+    console.log(JSON.stringify(nf, null, "\t"));
   };
 
   const tempp = async () => {

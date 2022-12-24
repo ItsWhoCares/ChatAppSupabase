@@ -11,6 +11,8 @@ import { auth } from "../../../firebase";
 import { supabase } from "../../initSupabase";
 import { getMessageByID } from "../../initSupabase";
 
+// import * as Notifications from "expo-notifications";
+
 const ChatListItem = ({ chat, onPress }) => {
   const navigation = useNavigation();
   const [otherUser, setOtherUser] = useState(chat.User);
@@ -25,6 +27,14 @@ const ChatListItem = ({ chat, onPress }) => {
       // console.log(userItem);
     };
     fetchUser();
+
+    // Notifications.setNotificationHandler({
+    //   handleNotification: async () => ({
+    //     shouldShowAlert: true,
+    //     shouldPlaySound: true,
+    //     shouldSetBadge: false,
+    //   }),
+    // });
 
     // console.log(chat.ChatRoom.id);
     // Subscribe to onUpdateChatRoom
@@ -49,9 +59,22 @@ const ChatListItem = ({ chat, onPress }) => {
           if (payload.new.id === chatRoom.ChatRoom.id) {
             const newChatRoom = { ...chatRoom } || {};
             newChatRoom.ChatRoom.LastMessageID = payload.new.LastMessageID;
-            const res = await getMessageByID(payload.new.LastMessageID);
-            newChatRoom.ChatRoom.LastMessage = res;
+            const newMsg = await getMessageByID(payload.new.LastMessageID);
+            newChatRoom.ChatRoom.LastMessage = newMsg;
             setChatRoom(newChatRoom);
+            // const res = await fetch("https://exp.host/--/api/v2/push/send", {
+            //   method: "POST",
+            //   headers: {
+            //     "Content-Type": "application/json",
+            //   },
+            //   // body: '{"to": "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]","title":"hello","body": "world"}',
+            //   body: JSON.stringify({
+            //     to: "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]",
+            //     title: otherUser.name,
+            //     body: newMsg.text,
+            //   }),
+            // });
+            // console.log(JSON.stringify(res, null, "\t"));
           }
 
           // console.log(
@@ -64,44 +87,8 @@ const ChatListItem = ({ chat, onPress }) => {
       .subscribe();
 
     return () => supabase.removeChannel(subscription);
-
-    // const subscription = API.graphql(
-    //   graphqlOperation(onUpdateChatRoom, {
-    //     filter: { id: { eq: chat.id } },
-    //   })
-    // ).subscribe({
-    //   next: ({ value }) => {
-    //     setChatRoom((cr) => ({
-    //       ...(cr || {}),
-    //       ...value.data.onUpdateChatRoom,
-    //     }));
-    //   },
-    //   error: (error) => console.warn(error),
-    // });
-
-    // // Stop receiving data updates from the subscription
-    // return () => subscription.unsubscribe();
   }, [chat.ChatRoom.id]);
 
-  // useEffect(() => {
-  //   const subscription = API.graphql(graphqlOperation(onUpdateChatRoom), {
-  //     filter: { id: { eq: chat.id } },
-  //   }).subscribe({
-  //     next: ({ value }) => {
-  //       setChatRoom((cr) => ({
-  //         ...(cr || {}),
-  //         ...value.data.onUpdateChatRoom,
-  //       }));
-  //     },
-  //     error: (error) => console.warn(error),
-  //   });
-  //   console.log("yeyeyeye");
-  //   return () => subscription.unsubscribe();
-  // }, [chat.id]);
-  // const chat = props.chat;
-  //   console.log(chat);
-
-  // console.log("\n\n\n\n\nhere\n\n\n\n", chatRoom, "\n\n\n\n\n\n");
   //check for not Auth user
   if (chatRoom?.ChatRoom?.LastMessage.text == "Send first message") {
     return null;
