@@ -24,8 +24,19 @@ const CustomHeader = ({ image, online, oUser }) => {
 
     channel.on("presence", { event: "sync" }, async () => {
       const onlineUsers = channel.presenceState();
-      // console.log("Online users: ", onlineUsers);
-      setUserOnline(onlineUsers[otherUser.id] ? true : false);
+      const ID = otherUser.id;
+      if (onlineUsers[ID]) {
+        const temp = onlineUsers[ID][0];
+        // console.log("Online users: ", onlineUsers, temp.online_at);
+        setUserOnline(
+          onlineUsers.hasOwnProperty(otherUser.id) &&
+            new Date().getTime() - temp.online_at < 10000
+            ? true
+            : false
+        );
+      } else {
+        setUserOnline(false);
+      }
       // console.log(onlineUsers[otherUser.id] ? true : false);
     });
     let inter;
@@ -34,9 +45,9 @@ const CustomHeader = ({ image, online, oUser }) => {
       if (status === "SUBSCRIBED") {
         inter = setInterval(async () => {
           const status = await channel.track({
-            online_at: new Date().toISOString(),
+            online_at: new Date().getTime(),
           });
-        }, 1000);
+        }, 5000);
       }
     });
     return () => {

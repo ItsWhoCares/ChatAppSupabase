@@ -16,43 +16,21 @@ import { auth } from "../../../firebase";
 
 import { listUserChatRooms } from "../../../supabaseQueries";
 import { supabase } from "../../initSupabase";
+
+// import { registerForPushNotificationsAsync } from "../../notification";
 import * as Notifications from "expo-notifications";
 
-import * as Device from "expo-device";
+import { addUserPushToken } from "../../../supabaseQueries";
 
 const Home = () => {
   const [expoPushToken, setExpoPushToken] = useState("");
 
-  const registerForPushNotificationsAsync = async () => {
-    if (Device.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") {
-        alert("Failed to get push token for push notification!");
-        return;
-      }
-      const token = (await Notifications.getExpoPushTokenAsync()).data;
-      // console.log(token);
-      setExpoPushToken(token);
-    } else {
-      // alert("Must use physical device for Push Notifications");
-    }
-
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-  };
-  registerForPushNotificationsAsync();
+  useEffect(() => {
+    const subscription = Notifications.addPushTokenListener(
+      addUserPushToken
+    );
+    return () => subscription.remove();
+  }, []);
 
   const appState = useRef(AppState.currentState);
 
@@ -62,18 +40,18 @@ const Home = () => {
       appState.current.match(/inactive|background/) &&
       nextAppState === "active"
     ) {
-      console.log("App has come to the foreground!");
+      // console.log("App has come to the foreground!");
 
       setRerender(!rerender);
     }
     if (appState.current === "background") {
       console.log("App is in background");
-      supabase.removeAllChannels();
-      try {
-        navigation.navigate("Home");
-      } catch (e) {
-        console.log(e);
-      }
+      // supabase.removeAllChannels();
+      // try {
+      //   navigation.navigate("Home");
+      // } catch (e) {
+      //   console.log(e);
+      // }
     }
     appState.current = nextAppState;
     setAppStateVisible(appState.current);

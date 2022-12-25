@@ -95,15 +95,21 @@ const Settings = () => {
   };
 
   const handelStatusChange = async () => {
-    // console.log("status changed", status);
-    // refInputName.current?.blur();
+    if (status.length < 3) {
+      alert("Status must be atleast 3 characters long");
+      setStatus(user.status);
+      return;
+    }
     await supabase.from("User").update({ status: status }).eq("id", user.id);
     fetchUser();
   };
 
   const handelNameChange = async () => {
-    // console.log("name changed", name);
-    // refInputName.current?.blur();
+    if (name.length < 3) {
+      alert("Name must be atleast 3 characters long");
+      setName(user.name);
+      return;
+    }
     await supabase.from("User").update({ name: name }).eq("id", user.id);
     fetchUser();
   };
@@ -181,7 +187,6 @@ const Settings = () => {
           <TextInput
             style={styles.subTitle}
             ref={refInputName}
-            
             maxLength={20}
             onChangeText={(text) => setName(text)}
             onSubmitEditing={handelNameChange}

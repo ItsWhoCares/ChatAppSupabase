@@ -22,6 +22,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { addUser } from "../../../supabaseQueries";
 
+import { registerForPushNotificationsAsync } from "../../notification";
+
 const SignIn = () => {
   const route = useRoute();
   // const [fontsLoaded] = useFonts({
@@ -62,7 +64,8 @@ const SignIn = () => {
         Alert.alert("Oops", "Something went wrong");
         return;
       }
-
+      console.log("Calling notification");
+      registerForPushNotificationsAsync();
       navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Oops", error.message);

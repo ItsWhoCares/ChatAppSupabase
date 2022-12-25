@@ -11,6 +11,8 @@ import {
   getCommonChatRoom,
 } from "../../../supabaseQueries";
 
+import { sendPushNotification } from "../../notification";
+
 const ChatInput = ({ chatRoom, otherUser }) => {
   const [message, setMessage] = useState("");
   // const [otherUser, setOtherUser] = useState(OtherUser);
@@ -67,33 +69,31 @@ const ChatInput = ({ chatRoom, otherUser }) => {
     //   console.log(e);
     // }
     setLoading(false);
-    // console.log("otherUser", otherUser);
-    const nf = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // body: '{"to": "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]","title":"hello","body": "world"}',
-      body: JSON.stringify({
-        to: "ExponentPushToken[KBqO4ID4i4FW6nA3vpdgt4]",
-        title: otherUser.name,
-        body: message,
-      }),
+
+    // send push notification
+    const notificationMessage = {
+      title: otherUser.name,
+      body: newMessageData.text,
+    };
+    sendPushNotification({
+      UserID: otherUser.id,
+      message: notificationMessage,
     });
-    console.log(JSON.stringify(nf, null, "\t"));
+
+    // console.log("otherUser", otherUser);
   };
 
-  const tempp = async () => {
-    console.log("tempp");
-    const res = await getCommonChatRoom({
-      authUserID: "usOWdwZr9XeOwdkIyjbJixXDmC12",
-      otherUserID: "JK2Ww9wLsuTXgFVwj9U6BCxUw704",
-    });
-  };
+  // const tempp = async () => {
+  //   console.log("tempp");
+  //   const res = await getCommonChatRoom({
+  //     authUserID: "usOWdwZr9XeOwdkIyjbJixXDmC12",
+  //     otherUserID: "JK2Ww9wLsuTXgFVwj9U6BCxUw704",
+  //   });
+  // };
 
   return (
     <View style={styles.inputContainer}>
-      <AntDesign name="plus" size={24} color="white" onPress={tempp} />
+      <AntDesign name="plus" size={24} color="white" />
       <TextInput
         value={message}
         onChangeText={(text) => setMessage(text)}
